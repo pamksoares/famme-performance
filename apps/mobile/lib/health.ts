@@ -93,112 +93,17 @@ async function requestAndReadAppleHealth(): Promise<HealthData | null> {
   }
 }
 
-// ─── Android: Health Connect ──────────────────────────────────────────────────
-
-async function requestAndReadHealthConnect(): Promise<HealthData | null> {
-  try {
-    const {
-      initialize,
-      requestPermission,
-      readRecords,
-      getSdkStatus,
-      SdkAvailabilityStatus,
-    } = await import("react-native-health-connect");
-
-    // Verifica se Health Connect está disponível no dispositivo
-    const status = await getSdkStatus();
-    if (status !== SdkAvailabilityStatus.SDK_AVAILABLE) {
-      return null;
-    }
-
-    const initialized = await initialize();
-    if (!initialized) return null;
-
-    const granted = await requestPermission([
-      { accessType: "read", recordType: "SleepSession" },
-      { accessType: "read", recordType: "HeartRate" },
-      { accessType: "read", recordType: "HeartRateVariabilitySdnn" },
-    ]);
-
-    if (!granted || granted.length === 0) return null;
-
-    const now = new Date();
-    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const timeRangeFilter = {
-      operator: "between" as const,
-      startTime: yesterday.toISOString(),
-      endTime: now.toISOString(),
-    };
-
-    const data: HealthData = {};
-
-    // HRV
-    try {
-      const { records: hrvRecords } = await readRecords("HeartRateVariabilitySdnn", {
-        timeRangeFilter,
-      });
-      if (hrvRecords.length > 0) {
-        const avg =
-          hrvRecords.reduce((sum: number, r: any) => sum + r.heartRateVariabilityMillis, 0) /
-          hrvRecords.length;
-        data.hrv = Math.round(avg);
-      }
-    } catch {}
-
-    // Sleep
-    try {
-      const { records: sleepRecords } = await readRecords("SleepSession", {
-        timeRangeFilter,
-      });
-      if (sleepRecords.length > 0) {
-        const totalMs = sleepRecords.reduce((sum: number, r: any) => {
-          const end = new Date(r.endTime).getTime();
-          const start = new Date(r.startTime).getTime();
-          return sum + Math.max(0, end - start);
-        }, 0);
-        data.sleepHours = Math.round((totalMs / 3_600_000) * 10) / 10;
-      }
-    } catch {}
-
-    // Heart Rate (resting = min value over 24h approximation)
-    try {
-      const { records: hrRecords } = await readRecords("HeartRate", {
-        timeRangeFilter,
-      });
-      if (hrRecords.length > 0) {
-        const allSamples = hrRecords.flatMap((r: any) => r.samples ?? []);
-        if (allSamples.length > 0) {
-          const sorted = allSamples
-            .map((s: any) => s.beatsPerMinute)
-            .sort((a: number, b: number) => a - b);
-          // Mediana dos valores mais baixos (proxy para FC de repouso)
-          const low = sorted.slice(0, Math.max(1, Math.floor(sorted.length * 0.1)));
-          data.restingHeartRate = Math.round(
-            low.reduce((a: number, b: number) => a + b, 0) / low.length
-          );
-        }
-      }
-    } catch {}
-
-    return Object.keys(data).length > 0 ? data : null;
-  } catch {
-    return null;
-  }
-}
-
 // ─── Unified API ──────────────────────────────────────────────────────────────
 
 /**
  * Solicita permissões de saúde e lê dados das últimas 24h.
- * iOS → Apple HealthKit | Android → Health Connect (funciona com Garmin, Samsung Health, etc.)
+ * iOS → Apple HealthKit | Android → Health Connect (em breve)
  */
 export async function requestAndReadHealth(): Promise<HealthData | null> {
   if (Platform.OS === "ios") {
     return requestAndReadAppleHealth();
   }
-  if (Platform.OS === "android") {
-    return requestAndReadHealthConnect();
-  }
+  // Android: Health Connect integration — em breve
   return null;
 }
 

@@ -201,31 +201,44 @@ export default function SettingsScreen() {
         {/* Integrações */}
         <Text style={styles.sectionLabel}>INTEGRAÇÕES</Text>
 
-        {/* Apple Health (iOS) / Health Connect (Android) */}
-        <View style={styles.intCard}>
-          <View style={[styles.intIcon, { backgroundColor: "#1a1a1a" }]}>
-            <Text>{Platform.OS === "android" ? "🏃" : "📱"}</Text>
+        {/* Apple Health (iOS only) */}
+        {Platform.OS === "ios" ? (
+          <View style={styles.intCard}>
+            <View style={[styles.intIcon, { backgroundColor: "#1a1a1a" }]}>
+              <Text>📱</Text>
+            </View>
+            <View style={styles.intInfo}>
+              <Text style={styles.intName}>Apple Health</Text>
+              <Text
+                style={[
+                  styles.intStatus,
+                  { color: appleConnected ? Colors.accent : Colors.textMuted },
+                ]}
+              >
+                {appleConnected ? "Conectado" : "Não conectado"}
+              </Text>
+            </View>
+            <Toggle value={appleConnected} onToggle={handleToggleApple} />
           </View>
-          <View style={styles.intInfo}>
-            <Text style={styles.intName}>
-              {Platform.OS === "android" ? "Health Connect" : "Apple Health"}
-            </Text>
-            <Text style={styles.intStatus}>
-              {Platform.OS === "android"
-                ? "Garmin, Samsung Health e mais"
-                : "Sono · HRV · FC repouso"}
-            </Text>
-            <Text
-              style={[
-                styles.intStatus,
-                { color: appleConnected ? Colors.accent : Colors.textMuted },
-              ]}
-            >
-              {appleConnected ? "Conectado" : "Não conectado"}
-            </Text>
+        ) : (
+          <View style={[styles.intCard, { opacity: 0.5 }]}>
+            <View style={[styles.intIcon, { backgroundColor: "#1a1a1a" }]}>
+              <Text>🏃</Text>
+            </View>
+            <View style={styles.intInfo}>
+              <Text style={styles.intName}>Health Connect</Text>
+              <Text style={styles.intStatus}>
+                Garmin, Samsung Health e mais
+              </Text>
+              <Text style={[styles.intStatus, { color: Colors.textDim }]}>
+                Em breve
+              </Text>
+            </View>
+            <View style={styles.soonBadge}>
+              <Text style={styles.soonText}>Em breve</Text>
+            </View>
           </View>
-          <Toggle value={appleConnected} onToggle={handleToggleApple} />
-        </View>
+        )}
 
         {/* Garmin Connect */}
         <TouchableOpacity

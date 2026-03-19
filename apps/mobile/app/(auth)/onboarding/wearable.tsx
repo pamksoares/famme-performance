@@ -57,52 +57,46 @@ export default function WearableScreen() {
         Opcional — você pode conectar agora ou depois nas Configurações.
       </Text>
 
-      {/* Apple Health (iOS) / Health Connect (Android) */}
-      <View style={styles.card}>
-        <View style={styles.iconBox}>
-          <Text style={styles.iconText}>{Platform.OS === "android" ? "🏃" : "📱"}</Text>
-        </View>
-        <View style={styles.info}>
-          <Text style={styles.deviceName}>
-            {Platform.OS === "android" ? "Health Connect" : "Apple Health"}
-          </Text>
-          <Text style={styles.deviceSub}>
-            {Platform.OS === "android"
-              ? "Garmin, Samsung Health e mais"
-              : "Sono · HRV · FC repouso"}
-          </Text>
-        </View>
-        <Toggle value={appleEnabled} onToggle={setAppleEnabled} />
-      </View>
-
-      {/* Garmin (Android: via Health Connect / iOS: em breve) */}
-      {Platform.OS === "android" ? (
-        <View style={[styles.card, styles.cardSoon]}>
-          <View style={[styles.iconBox, { backgroundColor: "#0a1a0f" }]}>
-            <Text style={styles.iconText}>⌚</Text>
+      {/* Apple Health */}
+      {Platform.OS === "ios" ? (
+        <View style={styles.card}>
+          <View style={styles.iconBox}>
+            <Text style={styles.iconText}>📱</Text>
           </View>
           <View style={styles.info}>
-            <Text style={styles.deviceName}>Garmin Connect</Text>
-            <Text style={styles.deviceSub}>Sincroniza via Health Connect</Text>
+            <Text style={styles.deviceName}>Apple Health</Text>
+            <Text style={styles.deviceSub}>Sono · HRV · FC repouso</Text>
           </View>
-          <View style={styles.garminBadge}>
-            <Text style={styles.garminBadgeText}>Auto</Text>
-          </View>
+          <Toggle value={appleEnabled} onToggle={setAppleEnabled} />
         </View>
       ) : (
-        <View style={[styles.card, styles.cardSoon]}>
-          <View style={[styles.iconBox, { backgroundColor: "#0a1a0f" }]}>
-            <Text style={styles.iconText}>⌚</Text>
+        <View style={[styles.card, { opacity: 0.5 }]}>
+          <View style={styles.iconBox}>
+            <Text style={styles.iconText}>🏃</Text>
           </View>
           <View style={styles.info}>
-            <Text style={styles.deviceName}>Garmin Connect</Text>
-            <Text style={styles.deviceSub}>Treinos · FC · Body Battery</Text>
+            <Text style={styles.deviceName}>Health Connect</Text>
+            <Text style={styles.deviceSub}>Garmin, Samsung Health e mais</Text>
           </View>
           <View style={styles.soonBadge}>
             <Text style={styles.soonText}>Em breve</Text>
           </View>
         </View>
       )}
+
+      {/* Garmin */}
+      <View style={[styles.card, styles.cardSoon]}>
+        <View style={[styles.iconBox, { backgroundColor: "#0a1a0f" }]}>
+          <Text style={styles.iconText}>⌚</Text>
+        </View>
+        <View style={styles.info}>
+          <Text style={styles.deviceName}>Garmin Connect</Text>
+          <Text style={styles.deviceSub}>Treinos · FC · Body Battery</Text>
+        </View>
+        <View style={styles.soonBadge}>
+          <Text style={styles.soonText}>Em breve</Text>
+        </View>
+      </View>
 
       {/* Whoop */}
       <View style={[styles.card, { opacity: 0.4 }]}>
@@ -119,9 +113,8 @@ export default function WearableScreen() {
       </View>
 
       <Text style={styles.hint}>
-        {Platform.OS === "android"
-          ? "Garmin sincroniza automaticamente com o Health Connect. Sem wearable? Tudo bem — o Femme funciona só com os dados do ciclo."
-          : "Sem wearable? Tudo bem — o Femme calcula seu score só com os dados do ciclo."}
+        Sem wearable? Tudo bem — o Femme calcula seu score só com os dados do
+        ciclo.
       </Text>
 
       {error && <Text style={styles.error}>{error}</Text>}

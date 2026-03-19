@@ -3718,11 +3718,6 @@ expo-status-bar@~1.12.1:
   resolved "https://registry.npmjs.org/expo-status-bar/-/expo-status-bar-1.12.1.tgz"
   integrity sha512-/t3xdbS8KB0prj5KG5w7z+wZPFlPtkgs95BsmrP/E7Q0xHXTcDcQ6Cu2FkFuRM+PKTb17cJDnLkawyS5vDLxMA==
 
-expo-web-browser@^55.0.10:
-  version "55.0.10"
-  resolved "https://registry.npmjs.org/expo-web-browser/-/expo-web-browser-55.0.10.tgz"
-  integrity sha512-2d6qVrg/nt0JvW5uAqOMDG/xITIXFe1Prkq1ri+I3PrC0QmV5cMYNSagU9ykfC8S7YKWxF1qO7Qsih9fxNa9dw==
-
 expo@~51.0.28:
   version "51.0.39"
   resolved "https://registry.npmjs.org/expo/-/expo-51.0.39.tgz"
@@ -6342,11 +6337,6 @@ react-is@^18.0.0:
   version "18.3.1"
   resolved "https://registry.npmjs.org/react-is/-/react-is-18.3.1.tgz"
   integrity sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==
-
-react-native-health-connect@^3.5.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/react-native-health-connect/-/react-native-health-connect-3.5.0.tgz#fbb88b5c111c88c8c8dc3e53a859ff729bd6bc3f"
-  integrity sha512-lIfiRps+jjDs83SApQ3AzBzU2cITwn8nPRl3v+52imWJPVw7qltAXkduioOfqFqOQJuEOwd1Wei3qtMTYbTaag==
 
 react-native-helmet-async@2.0.4:
   version "2.0.4"
