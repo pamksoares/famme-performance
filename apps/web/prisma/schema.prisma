@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum Modality {
+  CROSSFIT
+  HYROX
+  RUNNING
+  WEIGHTLIFTING
+}
+
+enum CyclePhase {
+  MENSTRUAL
+  FOLLICULAR
+  OVULATORY
+  LUTEAL
+}
+
+enum IntegrationType {
+  APPLE_HEALTH
+  GARMIN
+  WHOOP
+}
+
+enum Plan {
+  FREE
+  PRO
+  ELITE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  TRIALING
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// User
+// ─────────────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  modality     Modality  @default(CROSSFIT)
+  plan         Plan      @default(FREE)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  cycleEntries   CycleEntry[]
+  dailyScores    DailyScore[]
+  integrations   Integration[]
+  subscription   Subscription?
+  refreshTokens  RefreshToken[]
+
+  @@map("users")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Auth
+// ─────────────────────────────────────────────────────────────────────────────
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Cycle
+// ─────────────────────────────────────────────────────────────────────────────
+
+model CycleEntry {
+  id              String    @id @default(cuid())
+  userId          String
+  startDate       DateTime
+  cycleLengthDays Int       @default(28)
+  createdAt       DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startDate(sort: Desc)])
+  @@map("cycle_entries")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Daily Score
+// ─────────────────────────────────────────────────────────────────────────────
+
+model DailyScore {
+  id              String     @id @default(cuid())
+  userId          String
+  date            DateTime   @db.Date
+  score           Int        // 0–100
+  phase           CyclePhase
+  cycleDay        Int
+  hrv             Int?       // ms
+  sleepHours      Float?
+  restingHeartRate Int?
+  recommendation  String?    @db.Text  // gerado pelo Claude
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, date(sort: Desc)])
+  @@map("daily_scores")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Integrations (wearables)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Integration {
+  id           String          @id @default(cuid())
+  userId       String
+  type         IntegrationType
+  accessToken  String?         @db.Text
+  refreshToken String?         @db.Text
+  expiresAt    DateTime?
+  isActive     Boolean         @default(true)
+  lastSyncedAt DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+  @@index([userId])
+  @@map("integrations")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Subscription (Stripe)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String             @unique
+  stripeCustomerId     String             @unique
+  stripeSubscriptionId String?            @unique
+  plan                 Plan               @default(FREE)
+  status               SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([stripeCustomerId])
+  @@map("subscriptions")
+}

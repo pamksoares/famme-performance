@@ -1,0 +1,19 @@
+{
+  "name": "famme-performance",
+  "version": "0.0.1",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "yarn workspace @famme/web dev",
+    "build:web": "yarn workspace @famme/web build",
+    "db:generate": "yarn workspace @famme/web db:generate",
+    "db:migrate": "yarn workspace @famme/web db:migrate",
+    "db:studio": "yarn workspace @famme/web db:studio"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

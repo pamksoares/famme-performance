@@ -1,0 +1,15 @@
+node_modules/
+.next/
+dist/
+build/
+.env
+.env.local
+.env.production
+
+# Prisma
+apps/web/prisma/migrations/*.sql
+!apps/web/prisma/migrations/
+
+# OS
+.DS_Store
+Thumbs.db
