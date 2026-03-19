@@ -8,7 +8,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "build:ios": "eas build --platform ios",
-    "build:android": "eas build --platform android"
+    "build:android": "eas build --platform android",
+    "eas-build-post-install": "cd ../.. && npx patch-package --patch-dir patches"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "1.23.1",
@@ -23,7 +24,6 @@
     "expo-secure-store": "~13.0.2",
     "expo-splash-screen": "~0.27.5",
     "expo-status-bar": "~1.12.1",
-    "expo-web-browser": "^55.0.10",
     "react": "18.2.0",
     "react-native": "0.74.5",
     "react-native-health-connect": "^3.5.0",
