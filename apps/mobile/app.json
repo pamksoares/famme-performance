@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "Femme Performance",
+    "slug": "femme-performance",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "scheme": "femme",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0a0a08"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.famme.performance",
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "O Femme Performance lê seus dados de sono, HRV e frequência cardíaca para calcular seu score diário.",
+        "NSHealthUpdateUsageDescription": "O Femme Performance não escreve dados no Apple Health."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0a0a08"
+      },
+      "package": "app.famme.performance"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#c8f09a"
+        }
+      ],
+      [
+        "expo-health",
+        {
+          "healthSharePermission": "Lê sono, HRV e FC para calcular seu score diário",
+          "healthUpdatePermission": "Sem permissão de escrita"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
