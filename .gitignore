@@ -6,9 +6,8 @@ build/
 .env.local
 .env.production
 
-# Prisma
-apps/web/prisma/migrations/*.sql
-!apps/web/prisma/migrations/
+# Prisma — migrations devem ser versionadas para o Railway rodar migrate deploy
+# (não ignorar nada em prisma/migrations/)
 
 # OS
 .DS_Store
