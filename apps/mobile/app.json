@@ -15,9 +15,14 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "app.famme.performance",
+      "entitlements": {
+        "com.apple.developer.healthkit": true,
+        "com.apple.developer.healthkit.access": []
+      },
       "infoPlist": {
         "NSHealthShareUsageDescription": "O Femme Performance lê seus dados de sono, HRV e frequência cardíaca para calcular seu score diário.",
-        "NSHealthUpdateUsageDescription": "O Femme Performance não escreve dados no Apple Health."
+        "NSHealthUpdateUsageDescription": "O Femme Performance não escreve dados no Apple Health.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -25,7 +30,12 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0a0a08"
       },
-      "package": "app.famme.performance"
+      "package": "app.famme.performance",
+      "permissions": [
+        "android.permission.health.READ_SLEEP",
+        "android.permission.health.READ_HEART_RATE",
+        "android.permission.health.READ_HEART_RATE_VARIABILITY"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -38,15 +48,26 @@
         }
       ],
       [
-        "expo-health",
+        "react-native-health-connect",
         {
-          "healthSharePermission": "Lê sono, HRV e FC para calcular seu score diário",
-          "healthUpdatePermission": "Sem permissão de escrita"
+          "permissions": [
+            "SleepSession",
+            "HeartRate",
+            "HeartRateVariabilitySdnn"
+          ]
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "f12f9c7c-7323-445e-9c14-d9e4fc7b1d7f"
+      }
     }
   }
 }

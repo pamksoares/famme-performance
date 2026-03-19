@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, StyleSheet, Dimensions } from "react-native";
+import { View, Text, ScrollView, StyleSheet, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/Card";
@@ -6,22 +6,34 @@ import { Colors, Spacing, PHASE_COLORS, PHASE_LABELS } from "@/constants/theme";
 import { getScoreHistory } from "@/lib/api";
 import type { CyclePhase } from "@/lib/api";
 
-const SCREEN_WIDTH = Dimensions.get("window").width;
-const CHART_WIDTH = SCREEN_WIDTH - Spacing.xl * 2 - 36; // padding + card padding
-const BAR_MAX_HEIGHT = 70;
+const BAR_MAX_HEIGHT = 80;
 
-function ScoreBar({ score, phase }: { score: number; phase: CyclePhase }) {
+function ScoreBar({
+  score,
+  phase,
+  date,
+  showLabel,
+}: {
+  score: number;
+  phase: CyclePhase;
+  date: string;
+  showLabel: boolean;
+}) {
   const height = Math.max(4, (score / 100) * BAR_MAX_HEIGHT);
+  const d = new Date(date + "T12:00:00");
+  const label = d.toLocaleDateString("pt-BR", { day: "numeric", month: "numeric" });
   return (
-    <View
-      style={[
-        styles.bar,
-        {
-          height,
-          backgroundColor: PHASE_COLORS[phase] ?? Colors.accent,
-        },
-      ]}
-    />
+    <View style={styles.barWrapper}>
+      <View
+        style={[
+          styles.bar,
+          { height, backgroundColor: PHASE_COLORS[phase] ?? Colors.accent },
+        ]}
+      />
+      {showLabel && (
+        <Text style={styles.barLabel}>{label}</Text>
+      )}
+    </View>
   );
 }
 
@@ -33,6 +45,9 @@ export default function HistoryScreen() {
 
   const scores = data?.scores ?? [];
   const insights = data?.insights ?? [];
+
+  // Mostra label a cada ~3 barras para não poluir
+  const labelInterval = scores.length <= 7 ? 1 : scores.length <= 14 ? 2 : 3;
 
   const bestPhase = [...insights].sort((a, b) => b.avgScore - a.avgScore)[0];
   const worstPhase = [...insights].sort((a, b) => a.avgScore - b.avgScore)[0];
@@ -56,23 +71,17 @@ export default function HistoryScreen() {
           ) : scores.length === 0 ? (
             <Text style={styles.empty}>Sem dados ainda. Use o app por alguns dias!</Text>
           ) : (
-            <>
-              <View style={styles.chart}>
-                {scores.map((s, i) => (
-                  <ScoreBar
-                    key={i}
-                    score={s.score}
-                    phase={s.phase as CyclePhase}
-                  />
-                ))}
-              </View>
-              <View style={styles.chartLabels}>
-                <Text style={styles.chartLabel}>
-                  {scores.length} dias atrás
-                </Text>
-                <Text style={styles.chartLabel}>hoje</Text>
-              </View>
-            </>
+            <View style={styles.chart}>
+              {scores.map((s, i) => (
+                <ScoreBar
+                  key={i}
+                  score={s.score}
+                  phase={s.phase as CyclePhase}
+                  date={s.date}
+                  showLabel={i % labelInterval === 0 || i === scores.length - 1}
+                />
+              ))}
+            </View>
           )}
         </Card>
 
@@ -200,23 +209,26 @@ const styles = StyleSheet.create({
   chart: {
     flexDirection: "row",
     alignItems: "flex-end",
-    height: BAR_MAX_HEIGHT,
-    gap: 4,
+    height: BAR_MAX_HEIGHT + 20,
+    gap: 3,
     flex: 1,
+  },
+  barWrapper: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "flex-end",
+    height: BAR_MAX_HEIGHT + 20,
   },
   bar: {
-    flex: 1,
+    width: "100%",
     borderRadius: 3,
-    minWidth: 6,
+    minWidth: 4,
   },
-  chartLabels: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 8,
-  },
-  chartLabel: {
-    fontSize: 10,
+  barLabel: {
+    fontSize: 8,
     color: Colors.textDisabled,
+    marginTop: 4,
+    textAlign: "center",
   },
   empty: {
     fontSize: 13,

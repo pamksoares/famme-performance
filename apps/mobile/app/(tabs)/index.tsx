@@ -77,6 +77,15 @@ export default function HomeScreen() {
     return "Boa noite";
   };
 
+  const todayLabel = () => {
+    const now = new Date();
+    return now.toLocaleDateString("pt-BR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <ScrollView
@@ -91,9 +100,10 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View>
+          <View style={{ flex: 1, marginRight: 12 }}>
+            <Text style={styles.dateLabel}>{todayLabel()}</Text>
             <Text style={styles.greeting}>{greeting()},</Text>
-            <Text style={styles.name}>{user?.name ?? "—"}</Text>
+            <Text style={styles.name} numberOfLines={1}>{user?.name ?? "—"}</Text>
           </View>
           <View style={styles.notifBtn}>
             <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
@@ -225,6 +235,13 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.xl,
     paddingBottom: Spacing.lg,
     backgroundColor: Colors.bgHeader,
+  },
+  dateLabel: {
+    fontSize: 11,
+    color: Colors.textDim,
+    letterSpacing: 0.3,
+    marginBottom: 4,
+    textTransform: "capitalize",
   },
   greeting: {
     fontSize: 13,

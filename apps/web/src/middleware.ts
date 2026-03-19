@@ -11,8 +11,12 @@ const PUBLIC_ROUTES = new Set([
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Permite rotas públicas e stripe webhook (usa assinatura própria)
-  if (PUBLIC_ROUTES.has(pathname) || pathname === "/api/stripe/webhook") {
+  // Permite rotas públicas, stripe webhook e garmin webhook (usam assinaturas próprias)
+  if (
+    PUBLIC_ROUTES.has(pathname) ||
+    pathname === "/api/stripe/webhook" ||
+    pathname === "/api/integrations/garmin"
+  ) {
     return NextResponse.next();
   }
 

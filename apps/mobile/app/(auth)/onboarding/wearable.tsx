@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "@/components/ui/Button";
@@ -20,28 +27,20 @@ export default function WearableScreen() {
     setLoading(true);
     setError(null);
     try {
-      // 1. Registra o usuário
       const { user, accessToken } = await register({
         name: onboardingData.name,
         email: onboardingData.email,
         password: onboardingData.password,
         modality: onboardingData.modality,
       });
-
-      // 2. Persiste a sessão
       await setUser(user, accessToken);
-
-      // 3. Salva o ciclo menstrual
       await saveCycle({
         startDate: onboardingData.startDate,
         cycleLengthDays: onboardingData.cycleLengthDays,
       });
-
-      // 4. Solicita HealthKit se habilitado
       if (!skip && appleEnabled) {
         await requestAndReadHealth();
       }
-
       router.replace("/(tabs)/");
     } catch (e: any) {
       setError(e.message ?? "Erro ao criar conta. Tente novamente.");
@@ -52,59 +51,97 @@ export default function WearableScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.step}>WEARABLE — 3 DE 3</Text>
-      <Text style={styles.title}>Conecte seu dispositivo</Text>
+      <Text style={styles.step}>PASSO 3 DE 3</Text>
+      <Text style={styles.title}>Conecte um dispositivo</Text>
       <Text style={styles.subtitle}>
-        Usamos seus dados de sono e HRV para um score mais preciso.
+        Opcional — você pode conectar agora ou depois nas Configurações.
       </Text>
 
+      {/* Apple Health (iOS) / Health Connect (Android) */}
       <View style={styles.card}>
         <View style={styles.iconBox}>
-          <Text style={styles.iconText}>📱</Text>
+          <Text style={styles.iconText}>{Platform.OS === "android" ? "🏃" : "📱"}</Text>
         </View>
         <View style={styles.info}>
-          <Text style={styles.deviceName}>Apple Health</Text>
-          <Text style={styles.deviceSub}>Sono, HRV, FC</Text>
+          <Text style={styles.deviceName}>
+            {Platform.OS === "android" ? "Health Connect" : "Apple Health"}
+          </Text>
+          <Text style={styles.deviceSub}>
+            {Platform.OS === "android"
+              ? "Garmin, Samsung Health e mais"
+              : "Sono · HRV · FC repouso"}
+          </Text>
         </View>
         <Toggle value={appleEnabled} onToggle={setAppleEnabled} />
       </View>
 
-      <View style={[styles.card, styles.cardDisabled]}>
-        <View style={[styles.iconBox, { backgroundColor: "#0d1a0d" }]}>
-          <Text style={styles.iconText}>⌚</Text>
+      {/* Garmin (Android: via Health Connect / iOS: em breve) */}
+      {Platform.OS === "android" ? (
+        <View style={[styles.card, styles.cardSoon]}>
+          <View style={[styles.iconBox, { backgroundColor: "#0a1a0f" }]}>
+            <Text style={styles.iconText}>⌚</Text>
+          </View>
+          <View style={styles.info}>
+            <Text style={styles.deviceName}>Garmin Connect</Text>
+            <Text style={styles.deviceSub}>Sincroniza via Health Connect</Text>
+          </View>
+          <View style={styles.garminBadge}>
+            <Text style={styles.garminBadgeText}>Auto</Text>
+          </View>
         </View>
-        <View style={styles.info}>
-          <Text style={styles.deviceName}>Garmin Connect</Text>
-          <Text style={styles.deviceSub}>Treinos, FC, stress</Text>
+      ) : (
+        <View style={[styles.card, styles.cardSoon]}>
+          <View style={[styles.iconBox, { backgroundColor: "#0a1a0f" }]}>
+            <Text style={styles.iconText}>⌚</Text>
+          </View>
+          <View style={styles.info}>
+            <Text style={styles.deviceName}>Garmin Connect</Text>
+            <Text style={styles.deviceSub}>Treinos · FC · Body Battery</Text>
+          </View>
+          <View style={styles.soonBadge}>
+            <Text style={styles.soonText}>Em breve</Text>
+          </View>
         </View>
-        <Text style={styles.soon}>Em breve</Text>
-      </View>
+      )}
 
-      <View style={[styles.card, styles.cardDisabled]}>
+      {/* Whoop */}
+      <View style={[styles.card, { opacity: 0.4 }]}>
         <View style={[styles.iconBox, { backgroundColor: "#1a0d0d" }]}>
           <Text style={styles.iconText}>💪</Text>
         </View>
         <View style={styles.info}>
           <Text style={styles.deviceName}>Whoop</Text>
-          <Text style={styles.deviceSub}>Recovery, strain</Text>
+          <Text style={styles.deviceSub}>Recovery · Strain · Sleep</Text>
         </View>
-        <Text style={styles.soon}>Em breve</Text>
+        <View style={styles.soonBadge}>
+          <Text style={styles.soonText}>Em breve</Text>
+        </View>
       </View>
+
+      <Text style={styles.hint}>
+        {Platform.OS === "android"
+          ? "Garmin sincroniza automaticamente com o Health Connect. Sem wearable? Tudo bem — o Femme funciona só com os dados do ciclo."
+          : "Sem wearable? Tudo bem — o Femme calcula seu score só com os dados do ciclo."}
+      </Text>
 
       {error && <Text style={styles.error}>{error}</Text>}
 
       <View style={styles.actions}>
         {loading ? (
-          <ActivityIndicator color={Colors.accent} style={{ marginBottom: 16 }} />
+          <ActivityIndicator color={Colors.accent} />
         ) : (
           <>
-            <Button label="Entrar no app" onPress={() => handleFinish(false)} />
             <Button
-              variant="ghost"
-              label="Pular por agora"
-              style={{ marginTop: 12 }}
-              onPress={() => handleFinish(true)}
+              label={appleEnabled ? "Conectar e entrar" : "Entrar no app"}
+              onPress={() => handleFinish(false)}
             />
+            <TouchableOpacity
+              style={styles.skipBtn}
+              onPress={() => handleFinish(true)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.skipText}>Pular por agora</Text>
+            </TouchableOpacity>
           </>
         )}
       </View>
@@ -122,7 +159,7 @@ const styles = StyleSheet.create({
   step: {
     fontSize: 11,
     color: Colors.textDim,
-    letterSpacing: 0.8,
+    letterSpacing: 1,
     marginBottom: Spacing.xxl,
   },
   title: {
@@ -135,6 +172,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textMuted,
     marginBottom: Spacing.xxl,
+    lineHeight: 21,
   },
   card: {
     backgroundColor: Colors.bgCard,
@@ -147,49 +185,61 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
   },
-  cardDisabled: {
-    opacity: 0.5,
+  cardSoon: {
+    opacity: 0.7,
   },
   iconBox: {
-    width: 36,
-    height: 36,
+    width: 38,
+    height: 38,
     borderRadius: 10,
     backgroundColor: "#1a1a1a",
     alignItems: "center",
     justifyContent: "center",
   },
-  iconText: {
-    fontSize: 18,
-  },
-  info: {
-    flex: 1,
-  },
-  deviceName: {
-    fontSize: 14,
-    color: Colors.text,
-    fontWeight: "500",
-  },
-  deviceSub: {
-    fontSize: 11,
-    color: Colors.textMuted,
-  },
-  soon: {
-    fontSize: 10,
-    color: Colors.textDim,
+  iconText: { fontSize: 18 },
+  info: { flex: 1 },
+  deviceName: { fontSize: 14, color: Colors.text, fontWeight: "500" },
+  deviceSub: { fontSize: 11, color: Colors.textMuted, marginTop: 2 },
+  soonBadge: {
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 99,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    borderRadius: Radius.full,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  soonText: { fontSize: 10, color: Colors.textDim },
+  garminBadge: {
+    borderWidth: 1,
+    borderColor: Colors.accentBorder,
+    borderRadius: Radius.full,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: Colors.accentDim,
+  },
+  garminBadgeText: { fontSize: 10, color: Colors.accent },
+  hint: {
+    fontSize: 12,
+    color: Colors.textDim,
+    lineHeight: 18,
+    marginTop: Spacing.lg,
+    textAlign: "center",
   },
   error: {
     color: Colors.menstrual,
     fontSize: 13,
-    marginTop: 8,
+    marginTop: 12,
     textAlign: "center",
   },
   actions: {
     marginTop: "auto",
     paddingBottom: Spacing.xxl,
+  },
+  skipBtn: {
+    alignItems: "center",
+    paddingVertical: 16,
+  },
+  skipText: {
+    fontSize: 14,
+    color: Colors.textMuted,
   },
 });

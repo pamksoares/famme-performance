@@ -180,6 +180,29 @@ export async function getRecommendation(): Promise<Recommendation> {
 
 // ─── Integrations ─────────────────────────────────────────────────────────────
 
+// ─── Garmin ───────────────────────────────────────────────────────────────────
+
+export interface GarminStatus {
+  connected: boolean;
+  lastSyncedAt: string | null;
+  connectedAt: string | null;
+}
+
+/** Retorna URL do widget Terra para conectar o Garmin */
+export async function getGarminConnectUrl(): Promise<{ url: string }> {
+  return request("/api/integrations/garmin/connect");
+}
+
+/** Status da integração Garmin */
+export async function getGarminStatus(): Promise<GarminStatus> {
+  return request("/api/integrations/garmin");
+}
+
+/** Desconecta o Garmin */
+export async function disconnectGarmin(): Promise<{ disconnected: boolean }> {
+  return request("/api/integrations/garmin", { method: "DELETE" });
+}
+
 export async function syncAppleHealth(payload: {
   hrv?: number;
   sleepHours?: number;

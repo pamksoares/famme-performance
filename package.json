@@ -7,6 +7,7 @@
     "packages/*"
   ],
   "scripts": {
+    "postinstall": "patch-package",
     "dev:web": "yarn workspace @famme/web dev",
     "build:web": "yarn workspace @famme/web build",
     "db:generate": "yarn workspace @famme/web db:generate",
@@ -15,5 +16,9 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "babel-plugin-module-resolver": "^5.0.3",
+    "patch-package": "^8.0.1"
   }
 }
