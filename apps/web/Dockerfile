@@ -14,10 +14,13 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# DATABASE_URL dummy apenas para o prisma generate (não conecta ao banco no build)
+ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
+ENV NEXT_TELEMETRY_DISABLED=1
+
 # Gera o Prisma Client antes do build
 RUN yarn db:generate
 
-ENV NEXT_TELEMETRY_DISABLED=1
 RUN yarn build
 
 # ─── Stage 3: runner ──────────────────────────────────────────────────────────
