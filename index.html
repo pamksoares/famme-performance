@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Femme Performance — Protótipo</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: #0a0a08; font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; }
+.phone { width: 100%; max-width: 390px; min-height: 100vh; background: #0a0a08; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.screen { display: none; flex-direction: column; min-height: 100vh; }
+.screen.active { display: flex; }
+.acc { color: #c8f09a; }
+.muted { color: #666660; }
+.text-p { color: #f0ede6; }
+.sub { color: #888880; font-size: 12px; }
+.btn-primary { background: #c8f09a; color: #0a0a08; border: none; border-radius: 100px; padding: 16px 24px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; transition: background .15s; }
+.btn-primary:hover { background: #a8e070; }
+.btn-ghost { background: transparent; color: #c8f09a; border: 1px solid rgba(200,240,154,.3); border-radius: 100px; padding: 14px 24px; font-size: 14px; cursor: pointer; width: 100%; transition: all .15s; margin-top: 12px; }
+.card { background: #141412; border-radius: 16px; padding: 16px; margin-bottom: 10px; border: 1px solid #222220; }
+.pill { display: inline-block; padding: 4px 12px; border-radius: 99px; font-size: 11px; font-weight: 500; }
+.pill-green { background: rgba(200,240,154,.12); color: #c8f09a; }
+.pill-purple { background: rgba(175,169,236,.12); color: #afa9ec; }
+.pill-amber { background: rgba(239,159,39,.12); color: #ef9f27; }
+.pill-coral { background: rgba(240,153,123,.12); color: #f0997b; }
+.tab-bar { display: flex; background: #0e0e0c; border-top: 1px solid #1e1e1c; padding: 8px 0 28px; margin-top: auto; }
+.tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 6px 0; }
+.tab-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
+.tab-label { font-size: 10px; color: #444440; }
+.tab.active .tab-label { color: #c8f09a; }
+.phase-bar { display: flex; height: 4px; border-radius: 99px; overflow: hidden; gap: 2px; margin: 12px 0; }
+.phase-seg { flex: 1; border-radius: 99px; }
+.input-field { background: #141412; border: 1px solid #2a2a28; border-radius: 12px; padding: 14px; color: #f0ede6; font-size: 14px; width: 100%; margin-bottom: 12px; outline: none; -webkit-appearance: none; }
+.input-field:focus { border-color: rgba(200,240,154,.5); }
+.input-label { font-size: 11px; color: #666660; margin-bottom: 6px; letter-spacing: .04em; display: block; }
+.toggle { width: 44px; height: 24px; background: #2a2a28; border-radius: 99px; position: relative; cursor: pointer; transition: background .2s; flex-shrink: 0; }
+.toggle.on { background: #c8f09a; }
+.toggle::after { content: ''; position: absolute; width: 18px; height: 18px; background: #0a0a08; border-radius: 50%; top: 3px; left: 3px; transition: transform .2s; }
+.toggle.on::after { transform: translateX(20px); }
+.int-card { background: #141412; border-radius: 14px; padding: 14px; margin-bottom: 8px; border: 1px solid #222220; display: flex; align-items: center; gap: 12px; }
+.int-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.modal-sel { background: #141412; border: 1px solid #222220; border-radius: 12px; padding: 12px; text-align: center; font-size: 13px; color: #888880; cursor: pointer; transition: all .15s; }
+.modal-sel.selected { border-color: #c8f09a; color: #c8f09a; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- SPLASH -->
+  <div class="screen active" id="s-onboard1" style="padding:48px 28px 36px;justify-content:center;">
+    <div style="text-align:center;margin-bottom:48px;">
+      <svg width="72" height="72" viewBox="0 0 400 400" style="margin:0 auto 20px;display:block;">
+        <circle cx="200" cy="200" r="160" fill="none" stroke="#c8f09a" stroke-width="8"/>
+        <circle cx="200" cy="200" r="110" fill="none" stroke="#c8f09a" stroke-width="4" opacity="0.4"/>
+        <line x1="200" y1="40" x2="200" y2="360" stroke="#c8f09a" stroke-width="6"/>
+        <line x1="40" y1="200" x2="360" y2="200" stroke="#c8f09a" stroke-width="6"/>
+        <polygon points="200,40 214,182 200,200 186,182" fill="#c8f09a"/>
+        <polygon points="360,200 218,214 200,200 218,186" fill="#c8f09a" opacity="0.7"/>
+        <polygon points="200,360 186,218 200,200 214,218" fill="#c8f09a" opacity="0.5"/>
+        <polygon points="40,200 182,186 200,200 182,214" fill="#c8f09a" opacity="0.35"/>
+        <circle cx="200" cy="200" r="18" fill="#c8f09a"/>
+        <circle cx="200" cy="200" r="7" fill="#0a0a08"/>
+      </svg>
+      <div style="font-family:Georgia,serif;font-size:28px;color:#f0ede6;letter-spacing:3px;margin-bottom:6px;">FEMME</div>
+      <div style="font-family:Georgia,serif;font-size:15px;color:#c8f09a;font-style:italic;letter-spacing:6px;">performance</div>
+    </div>
+    <div style="font-family:Georgia,serif;font-size:26px;color:#f0ede6;line-height:1.25;text-align:center;margin-bottom:14px;">Treine com<br>seu corpo,<br><em style="color:#c8f09a;">não contra ele</em></div>
+    <div style="font-size:14px;color:#888880;text-align:center;line-height:1.7;margin-bottom:48px;">Dados corporais + ciclo hormonal =<br>treino inteligente para a sua biologia.</div>
+    <button class="btn-primary" onclick="go('s-onboard2')">Começar</button>
+    <button class="btn-ghost" onclick="go('s-home')">Já tenho conta</button>
+  </div>
+
+  <!-- ONBOARD 1 — PERFIL -->
+  <div class="screen" id="s-onboard2" style="padding:48px 28px 28px;">
+    <div style="font-size:11px;color:#666660;letter-spacing:.08em;margin-bottom:28px;">PERFIL — 1 DE 3</div>
+    <div style="font-family:Georgia,serif;font-size:22px;color:#f0ede6;margin-bottom:8px;">Como você se chama?</div>
+    <div style="font-size:14px;color:#888880;margin-bottom:32px;">Vamos personalizar sua experiência.</div>
+    <label class="input-label">NOME</label>
+    <input class="input-field" placeholder="Seu nome"/>
+    <label class="input-label" style="margin-top:4px;">MODALIDADE PRINCIPAL</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:32px;">
+      <div class="modal-sel selected" onclick="selectModal(this)">CrossFit</div>
+      <div class="modal-sel" onclick="selectModal(this)">Hyrox</div>
+      <div class="modal-sel" onclick="selectModal(this)">Corrida</div>
+      <div class="modal-sel" onclick="selectModal(this)">Musculação</div>
+    </div>
+    <button class="btn-primary" onclick="go('s-onboard3')">Continuar</button>
+    <button class="btn-ghost" onclick="go('s-onboard1')" style="border:none;color:#444440;margin-top:8px;">Voltar</button>
+  </div>
+
+  <!-- ONBOARD 2 — CICLO -->
+  <div class="screen" id="s-onboard3" style="padding:48px 28px 28px;">
+    <div style="font-size:11px;color:#666660;letter-spacing:.08em;margin-bottom:28px;">CICLO — 2 DE 3</div>
+    <div style="font-family:Georgia,serif;font-size:22px;color:#f0ede6;margin-bottom:8px;">Seu ciclo menstrual</div>
+    <div style="font-size:14px;color:#888880;margin-bottom:32px;">Usamos isso para calibrar suas recomendações.</div>
+    <label class="input-label">PRIMEIRO DIA DO ÚLTIMO CICLO</label>
+    <input class="input-field" type="date"/>
+    <label class="input-label" style="margin-top:4px;">DURAÇÃO MÉDIA DO CICLO</label>
+    <div style="display:flex;align-items:center;gap:16px;background:#141412;border:1px solid #2a2a28;border-radius:12px;padding:16px;margin-bottom:32px;">
+      <button onclick="changeCycle(-1)" style="background:#222220;border:none;color:#f0ede6;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:20px;flex-shrink:0;">−</button>
+      <div style="flex:1;text-align:center;">
+        <span style="font-size:28px;font-weight:500;color:#f0ede6;" id="cycle-days">28</span>
+        <span style="color:#888880;font-size:13px;margin-left:6px;">dias</span>
+      </div>
+      <button onclick="changeCycle(1)" style="background:#222220;border:none;color:#f0ede6;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:20px;flex-shrink:0;">+</button>
+    </div>
+    <button class="btn-primary" onclick="go('s-onboard4')">Continuar</button>
+    <button class="btn-ghost" onclick="go('s-onboard2')" style="border:none;color:#444440;margin-top:8px;">Voltar</button>
+  </div>
+
+  <!-- ONBOARD 3 — WEARABLE -->
+  <div class="screen" id="s-onboard4" style="padding:48px 28px 28px;">
+    <div style="font-size:11px;color:#666660;letter-spacing:.08em;margin-bottom:28px;">WEARABLE — 3 DE 3</div>
+    <div style="font-family:Georgia,serif;font-size:22px;color:#f0ede6;margin-bottom:8px;">Conecte seu dispositivo</div>
+    <div style="font-size:14px;color:#888880;margin-bottom:28px;">Usamos seus dados de sono e HRV para um score mais preciso.</div>
+    <div class="int-card">
+      <div class="int-icon" style="background:#1a1a1a;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f0ede6" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M9 7h6M9 12h6M9 17h4"/></svg></div>
+      <div style="flex:1;"><div style="font-size:14px;color:#f0ede6;font-weight:500;">Apple Health</div><div style="font-size:11px;color:#888880;">Sono, HRV, FC</div></div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="int-card">
+      <div class="int-icon" style="background:#0d1a0d;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c8f09a" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div style="flex:1;"><div style="font-size:14px;color:#f0ede6;font-weight:500;">Garmin Connect</div><div style="font-size:11px;color:#888880;">Treinos, FC, stress</div></div>
+      <div class="toggle" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="int-card">
+      <div class="int-icon" style="background:#1a0d0d;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f0997b" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M12 8v8"/></svg></div>
+      <div style="flex:1;"><div style="font-size:14px;color:#f0ede6;font-weight:500;">Whoop</div><div style="font-size:11px;color:#888880;">Recovery, strain</div></div>
+      <div class="toggle" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div style="margin-top:auto;padding-top:28px;">
+      <button class="btn-primary" onclick="go('s-home')">Entrar no app</button>
+      <button class="btn-ghost" onclick="go('s-home')">Pular por agora</button>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen" id="s-home">
+    <div style="padding:52px 20px 16px;background:#0e0e0c;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <div>
+          <div style="font-size:13px;color:#888880;">Boa tarde,</div>
+          <div style="font-size:20px;font-weight:500;color:#f0ede6;">Pamella</div>
+        </div>
+        <div style="width:40px;height:40px;border-radius:50%;background:rgba(200,240,154,.12);display:flex;align-items:center;justify-content:center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c8f09a" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:0;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;">
+          <div>
+            <span class="pill pill-purple">Fase folicular</span>
+            <div style="font-size:12px;color:#888880;margin-top:8px;">Dia 8 do ciclo · 5 dias restantes</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:38px;font-weight:500;color:#c8f09a;line-height:1;">87</div>
+            <div style="font-size:10px;color:#888880;">score hoje</div>
+          </div>
+        </div>
+        <div class="phase-bar">
+          <div class="phase-seg" style="background:#f0997b;opacity:.5;flex:0.17;"></div>
+          <div class="phase-seg" style="background:#c8f09a;flex:0.29;"></div>
+          <div class="phase-seg" style="background:#ef9f27;opacity:.4;flex:0.11;"></div>
+          <div class="phase-seg" style="background:#afa9ec;opacity:.4;flex:0.43;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#555552;">
+          <span>Menstrual</span><span style="color:#c8f09a;font-weight:500;">Folicular</span><span>Ovulatória</span><span>Lútea</span>
+        </div>
+      </div>
+    </div>
+    <div style="padding:16px 20px;flex:1;overflow-y:auto;">
+      <div style="font-size:11px;color:#888880;margin-bottom:12px;letter-spacing:.06em;">SEUS DADOS HOJE</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+        <div style="background:#141412;border-radius:12px;padding:14px;text-align:center;border:1px solid #222220;">
+          <div style="font-size:20px;font-weight:500;color:#c8f09a;">7h2</div>
+          <div style="font-size:11px;color:#888880;margin-top:3px;">sono</div>
+        </div>
+        <div style="background:#141412;border-radius:12px;padding:14px;text-align:center;border:1px solid #222220;">
+          <div style="font-size:20px;font-weight:500;color:#c8f09a;">68</div>
+          <div style="font-size:11px;color:#888880;margin-top:3px;">HRV</div>
+        </div>
+        <div style="background:#141412;border-radius:12px;padding:14px;text-align:center;border:1px solid #222220;">
+          <div style="font-size:20px;font-weight:500;color:#c8f09a;">52</div>
+          <div style="font-size:11px;color:#888880;margin-top:3px;">FC repouso</div>
+        </div>
+      </div>
+      <div class="card" style="cursor:pointer;" onclick="go('s-treino')">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:11px;color:#888880;margin-bottom:5px;">RECOMENDAÇÃO DE HOJE</div>
+            <div style="font-size:15px;font-weight:500;color:#f0ede6;">Treino forte — dia verde</div>
+            <div style="font-size:12px;color:#888880;margin-top:3px;">HRV alto + fase folicular</div>
+          </div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c8f09a" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab active" onclick="go('s-home')">
+        <div class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c8f09a" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
+        <div class="tab-label" style="color:#c8f09a;">Início</div>
+      </div>
+      <div class="tab" onclick="go('s-treino')">
+        <div class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#444440" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="tab-label">Treino</div>
+      </div>
+      <div class="tab" onclick="go('s-historico')">
+        <div class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#444440" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="tab-label">Histórico</div>
+      </div>
+      <div class="tab" onclick="go('s-config')">
+        <div class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#444440" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l-.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+        <div class="tab-label">Config</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TREINO -->
+  <div class="screen" id="s-treino">
+    <div style="padding:52px 20px 16px;background:#0e0e0c;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <button onclick="go('s-home')" style="background:none;border:none;cursor:pointer;color:#888880;padding:0;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div style="font-size:17px;font-weight:500;color:#f0ede6;">Recomendação de hoje</div>
+      </div>
+      <div style="background:#141412;border-radius:16px;padding:20px;border:1px solid rgba(200,240,154,.2);">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:10px;height:10px;border-radius:50%;background:#c8f09a;flex-shrink:0;"></div>
+          <div style="font-size:14px;color:#c8f09a;font-weight:500;">Dia verde — treino forte</div>
+        </div>
+        <div style="font-size:13px;color:#888880;line-height:1.6;">HRV 68 acima da sua média, sono ok e fase folicular — melhor janela do mês para força e intensidade.</div>
+      </div>
+    </div>
+    <div style="padding:16px 20px;flex:1;overflow-y:auto;">
+      <div style="font-size:11px;color:#888880;margin-bottom:12px;letter-spacing:.06em;">TREINO RECOMENDADO</div>
+      <div class="card">
+        <div style="font-size:15px;font-weight:500;color:#f0ede6;margin-bottom:6px;">Alta intensidade — força</div>
+        <div style="font-size:13px;color:#888880;margin-bottom:14px;line-height:1.5;">Bom dia para PRs. Priorize levantamentos compostos e trabalho de potência.</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="pill pill-green">Squat</span>
+          <span class="pill pill-green">Deadlift</span>
+          <span class="pill pill-green">Clean & Jerk</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#888880;margin:8px 0 12px;letter-spacing:.06em;">RECUPERAÇÃO</div>
+      <div class="card">
+        <div style="font-size:15px;font-weight:500;color:#f0ede6;margin-bottom:6px;">Pós-treino</div>
+        <div style="font-size:13px;color:#888880;line-height:1.5;">Proteína 30min após, 7–8h de sono, mobilidade leve à noite. Fase folicular — recuperação rápida.</div>
+      </div>
+      <div style="font-size:11px;color:#888880;margin:8px 0 12px;letter-spacing:.06em;">ALERTA</div>
+      <div style="background:#141412;border-radius:12px;padding:14px;border-left:3px solid #c8f09a;">
+        <div style="font-size:13px;color:#c8f09a;font-weight:500;margin-bottom:4px;">Janela de PR aberta</div>
+        <div style="font-size:12px;color:#888880;line-height:1.5;">Fase folicular + HRV alto = melhor momento do mês para testar seus limites.</div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab" onclick="go('s-home')">
+        <div class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#444440" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
+        <div class="tab-label">Início</div>
+      </div>
+      <div class="tab active" onclick="go('s-treino')">
+        <div class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c8f09a" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="tab-label" style="color:#c8f09a;">Treino</div>
+      </div>
+      <div class="tab" onclick="go('s-historico')">
+        <div class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#444440" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="tab-label">Histórico</div>
+      </div>
+      <div class="tab" onclick="go('s-config')">
+        <div class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#444440" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l-.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+        <div class="tab-label">Config</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTÓRICO -->
+  <div class="screen" id="s-historico">
+    <div style="padding:52px 20px 16px;background:#0e0e0c;">
+      <div style="font-size:17px;font-weight:500;color:#f0ede6;margin-bottom:4px;">Histórico</div>
+      <div style="font-size:13px;color:#888880;">Seus padrões ao longo do tempo</div>
+    </div>
+    <div style="padding:16px 20px;flex:1;overflow-y:auto;">
+      <div style="font-size:11px;color:#888880;margin-bottom:12px;letter-spacing:.06em;">SCORE — ÚLTIMOS 14 DIAS</div>
+      <div style="background:#141412;border-radius:14px;padding:18px;margin-bottom:16px;border:1px solid #222220;">
+        <div style="display:flex;align-items:flex-end;gap:4px;height:70px;">
+          <div style="flex:1;background:#f0997b;border-radius:3px 3px 0 0;opacity:.6;height:42%;"></div>
+          <div style="flex:1;background:#f0997b;border-radius:3px 3px 0 0;opacity:.5;height:30%;"></div>
+          <div style="flex:1;background:#888780;border-radius:3px 3px 0 0;height:50%;"></div>
+          <div style="flex:1;background:#c8f09a;border-radius:3px 3px 0 0;height:65%;"></div>
+          <div style="flex:1;background:#c8f09a;border-radius:3px 3px 0 0;height:80%;"></div>
+          <div style="flex:1;background:#c8f09a;border-radius:3px 3px 0 0;height:90%;"></div>
+          <div style="flex:1;background:#c8f09a;border-radius:3px 3px 0 0;height:85%;"></div>
+          <div style="flex:1;background:#ef9f27;border-radius:3px 3px 0 0;height:70%;"></div>
+          <div style="flex:1;background:#ef9f27;border-radius:3px 3px 0 0;height:60%;"></div>
+          <div style="flex:1;background:#afa9ec;border-radius:3px 3px 0 0;height:50%;"></div>
+          <div style="flex:1;background:#afa9ec;border-radius:3px 3px 0 0;height:45%;"></div>
+          <div style="flex:1;background:#afa9ec;border-radius:3px 3px 0 0;height:40%;"></div>
+          <div style="flex:1;background:#afa9ec;border-radius:3px 3px 0 0;height:35%;"></div>
+          <div style="flex:1;background:#c8f09a;border-radius:3px 3px 0 0;height:87%;border:1px solid #c8f09a;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;">
+          <span style="font-size:10px;color:#444440;">14 dias atrás</span>
+          <span style="font-size:10px;color:#444440;">hoje</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#888880;margin-bottom:12px;letter-spacing:.06em;">INSIGHTS DO CICLO</div>
+      <div class="card">
+        <div style="font-size:13px;color:#c8f09a;font-weight:500;margin-bottom:5px;">Padrão identificado</div>
+        <div style="font-size:13px;color:#888880;line-height:1.5;">Seus melhores scores acontecem nos dias 7–13. HRV médio 12% acima da sua baseline nessa janela.</div>
+      </div>
+      <div style="background:#141412;border-radius:12px;padding:14px;border-left:3px solid #afa9ec;margin-top:4px;">
+        <div style="font-size:13px;color:#afa9ec;font-weight:500;margin-bottom:4px;">Fase lútea — atenção</div>
+        <div style="font-size:12px;color:#888880;line-height:1.5;">Nos últimos 2 ciclos, seu score caiu 30% nos dias 22–26. Considere reduzir volume nessa janela.</div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab" onclick="go('s-home')">
+        <div class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#444440" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
+        <div class="tab-label">Início</div>
+      </div>
+      <div class="tab" onclick="go('s-treino')">
+        <div class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#444440" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="tab-label">Treino</div>
+      </div>
+      <div class="tab active" onclick="go('s-historico')">
+        <div class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c8f09a" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="tab-label" style="color:#c8f09a;">Histórico</div>
+      </div>
+      <div class="tab" onclick="go('s-config')">
+        <div class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#444440" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l-.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+        <div class="tab-label">Config</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="screen" id="s-config">
+    <div style="padding:52px 20px 16px;background:#0e0e0c;">
+      <div style="font-size:17px;font-weight:500;color:#f0ede6;margin-bottom:4px;">Configurações</div>
+      <div style="font-size:13px;color:#888880;">Perfil e integrações</div>
+    </div>
+    <div style="padding:16px 20px;flex:1;overflow-y:auto;">
+      <div style="display:flex;align-items:center;gap:14px;background:#141412;border-radius:14px;padding:18px;margin-bottom:16px;border:1px solid #222220;">
+        <div style="width:48px;height:48px;border-radius:50%;background:rgba(200,240,154,.12);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:500;color:#c8f09a;flex-shrink:0;">PA</div>
+        <div>
+          <div style="font-size:15px;font-weight:500;color:#f0ede6;">Pamella</div>
+          <div style="font-size:12px;color:#888880;margin-top:2px;">CrossFit · Plano Pro</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#888880;margin-bottom:12px;letter-spacing:.06em;">INTEGRAÇÕES</div>
+      <div class="int-card">
+        <div class="int-icon" style="background:#1a1a1a;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f0ede6" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="3"/></svg></div>
+        <div style="flex:1;"><div style="font-size:14px;color:#f0ede6;">Apple Health</div><div style="font-size:11px;color:#c8f09a;">Conectado</div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="int-card">
+        <div class="int-icon" style="background:#0d1a0d;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c8f09a" stroke-width="1.5"><circle cx="12" cy="12" r="9"/></svg></div>
+        <div style="flex:1;"><div style="font-size:14px;color:#f0ede6;">Garmin Connect</div><div style="font-size:11px;color:#888880;">Não conectado</div></div>
+        <div class="toggle" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="int-card">
+        <div class="int-icon" style="background:#1a0d0d;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f0997b" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>
+        <div style="flex:1;"><div style="font-size:14px;color:#f0ede6;">Whoop</div><div style="font-size:11px;color:#888880;">Não conectado</div></div>
+        <div class="toggle" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div style="font-size:11px;color:#888880;margin:16px 0 12px;letter-spacing:.06em;">NOTIFICAÇÕES</div>
+      <div class="int-card">
+        <div style="flex:1;"><div style="font-size:14px;color:#f0ede6;">Score diário</div><div style="font-size:11px;color:#888880;">Toda manhã às 7h</div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="int-card">
+        <div style="flex:1;"><div style="font-size:14px;color:#f0ede6;">Alertas de ciclo</div><div style="font-size:11px;color:#888880;">Mudança de fase</div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab" onclick="go('s-home')">
+        <div class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#444440" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
+        <div class="tab-label">Início</div>
+      </div>
+      <div class="tab" onclick="go('s-treino')">
+        <div class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#444440" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="tab-label">Treino</div>
+      </div>
+      <div class="tab" onclick="go('s-historico')">
+        <div class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#444440" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="tab-label">Histórico</div>
+      </div>
+      <div class="tab active" onclick="go('s-config')">
+        <div class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c8f09a" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l-.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+        <div class="tab-label" style="color:#c8f09a;">Config</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+let cycleVal = 28;
+function changeCycle(d) {
+  cycleVal = Math.min(35, Math.max(21, cycleVal + d));
+  document.getElementById('cycle-days').textContent = cycleVal;
+}
+function selectModal(el) {
+  el.parentElement.querySelectorAll('.modal-sel').forEach(d => d.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>
+</body>
+</html>
