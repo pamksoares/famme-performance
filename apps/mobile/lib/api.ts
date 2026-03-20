@@ -244,3 +244,28 @@ export async function createCheckout(payload: {
     body: JSON.stringify(payload),
   });
 }
+
+// ─── User profile ─────────────────────────────────────────────────────────────
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  modality: "CROSSFIT" | "HYROX" | "RUNNING" | "WEIGHTLIFTING";
+  plan: "FREE" | "PRO" | "ELITE";
+  createdAt: string;
+}
+
+export async function getUser(): Promise<UserProfile> {
+  return request("/api/user");
+}
+
+export async function updateUser(payload: {
+  name?: string;
+  modality?: "CROSSFIT" | "HYROX" | "RUNNING" | "WEIGHTLIFTING";
+}): Promise<UserProfile> {
+  return request("/api/user", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}

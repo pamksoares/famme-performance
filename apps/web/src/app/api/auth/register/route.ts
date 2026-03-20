@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { signAccessToken, signRefreshToken, setAuthCookies } from "@/lib/auth";
 import { created, err, handleError } from "@/lib/response";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 const schema = z.object({
   name: z.string().min(2).max(80),
@@ -16,6 +17,16 @@ const schema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    const { allowed } = checkRateLimit(ip, {
+      name: "register",
+      limit: 5,
+      windowMs: 60 * 60 * 1000, // 5 tentativas por hora
+    });
+    if (!allowed) {
+      return err("Muitas tentativas de cadastro. Tente novamente mais tarde.", 429);
+    }
+
     const body = await req.json();
     const { name, email, password, modality } = schema.parse(body);
 
