@@ -1,23 +1,29 @@
-import { View, Text, ScrollView, StyleSheet, useWindowDimensions } from "react-native";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/Card";
 import { Colors, Spacing, PHASE_COLORS, PHASE_LABELS } from "@/constants/theme";
 import { getScoreHistory } from "@/lib/api";
+import { useAuthStore } from "@/lib/store";
 import type { CyclePhase } from "@/lib/api";
 
 const BAR_MAX_HEIGHT = 80;
+const FREE_DAYS_LIMIT = 14;
+const PRO_DAYS_LIMIT = 30;
 
 function ScoreBar({
   score,
   phase,
   date,
   showLabel,
+  locked,
 }: {
   score: number;
   phase: CyclePhase;
   date: string;
   showLabel: boolean;
+  locked?: boolean;
 }) {
   const height = Math.max(4, (score / 100) * BAR_MAX_HEIGHT);
   const d = new Date(date + "T12:00:00");
@@ -27,26 +33,37 @@ function ScoreBar({
       <View
         style={[
           styles.bar,
-          { height, backgroundColor: PHASE_COLORS[phase] ?? Colors.accent },
+          {
+            height,
+            backgroundColor: locked
+              ? Colors.border
+              : (PHASE_COLORS[phase] ?? Colors.accent),
+            opacity: locked ? 0.4 : 1,
+          },
         ]}
       />
       {showLabel && (
-        <Text style={styles.barLabel}>{label}</Text>
+        <Text style={[styles.barLabel, locked && { color: Colors.textDisabled }]}>
+          {label}
+        </Text>
       )}
     </View>
   );
 }
 
 export default function HistoryScreen() {
+  const { user } = useAuthStore();
+  const isPro = user?.plan === "PRO" || user?.plan === "ELITE";
+  const daysToFetch = isPro ? PRO_DAYS_LIMIT : FREE_DAYS_LIMIT;
+
   const { data, isLoading } = useQuery({
-    queryKey: ["score", "history"],
-    queryFn: () => getScoreHistory(14),
+    queryKey: ["score", "history", daysToFetch],
+    queryFn: () => getScoreHistory(daysToFetch),
   });
 
   const scores = data?.scores ?? [];
   const insights = data?.insights ?? [];
 
-  // Mostra label a cada ~3 barras para não poluir
   const labelInterval = scores.length <= 7 ? 1 : scores.length <= 14 ? 2 : 3;
 
   const bestPhase = [...insights].sort((a, b) => b.avgScore - a.avgScore)[0];
@@ -55,8 +72,18 @@ export default function HistoryScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
-        <Text style={styles.title}>Histórico</Text>
-        <Text style={styles.subtitle}>Seus padrões ao longo do tempo</Text>
+        <View>
+          <Text style={styles.title}>Histórico</Text>
+          <Text style={styles.subtitle}>Seus padrões ao longo do tempo</Text>
+        </View>
+        {!isPro && (
+          <TouchableOpacity
+            style={styles.proBadge}
+            onPress={() => router.push("/(tabs)/upgrade")}
+          >
+            <Text style={styles.proBadgeText}>Pro →</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <ScrollView
@@ -64,7 +91,9 @@ export default function HistoryScreen() {
         contentContainerStyle={styles.content}
       >
         {/* Gráfico de barras */}
-        <Text style={styles.sectionLabel}>SCORE — ÚLTIMOS 14 DIAS</Text>
+        <Text style={styles.sectionLabel}>
+          SCORE — ÚLTIMOS {daysToFetch} DIAS
+        </Text>
         <Card style={styles.chartCard}>
           {isLoading ? (
             <View style={{ height: BAR_MAX_HEIGHT + 20 }} />
@@ -84,6 +113,21 @@ export default function HistoryScreen() {
             </View>
           )}
         </Card>
+
+        {/* Paywall para histórico extendido */}
+        {!isPro && (
+          <TouchableOpacity
+            style={styles.upgradePrompt}
+            onPress={() => router.push("/(tabs)/upgrade")}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.upgradePromptTitle}>✦ Desbloqueie 30 dias de histórico</Text>
+            <Text style={styles.upgradePromptText}>
+              Com o plano Pro você vê padrões completos do seu ciclo e treina com mais precisão.
+            </Text>
+            <Text style={styles.upgradePromptCta}>Ver planos →</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Insights do ciclo */}
         {insights.length > 0 && (
@@ -129,7 +173,6 @@ export default function HistoryScreen() {
               </View>
             )}
 
-            {/* Tabela de médias por fase */}
             <Text style={[styles.sectionLabel, { marginTop: 8 }]}>
               MÉDIA POR FASE
             </Text>
@@ -177,6 +220,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.bg,
   },
   header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.xl,
     paddingBottom: Spacing.lg,
@@ -192,6 +238,15 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.textMuted,
   },
+  proBadge: {
+    borderWidth: 1,
+    borderColor: Colors.accentBorder,
+    borderRadius: 99,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    backgroundColor: Colors.accentDim,
+  },
+  proBadgeText: { fontSize: 12, color: Colors.accent, fontWeight: "500" },
   content: {
     padding: Spacing.xl,
     paddingBottom: 40,
@@ -235,6 +290,31 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textAlign: "center",
     paddingVertical: 24,
+  },
+  upgradePrompt: {
+    backgroundColor: Colors.accentDim,
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: Colors.accentBorder,
+    marginBottom: 20,
+  },
+  upgradePromptTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: Colors.accent,
+    marginBottom: 6,
+  },
+  upgradePromptText: {
+    fontSize: 13,
+    color: Colors.textMuted,
+    lineHeight: 20,
+    marginBottom: 10,
+  },
+  upgradePromptCta: {
+    fontSize: 13,
+    color: Colors.accent,
+    fontWeight: "500",
   },
   insightTitle: {
     fontSize: 13,

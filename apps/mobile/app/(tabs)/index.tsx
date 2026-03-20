@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Share,
+  Alert,
 } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -35,6 +37,12 @@ function scoreColor(score: number): string {
   return Colors.red;
 }
 
+function scoreEmoji(score: number): string {
+  if (score >= 75) return "🟢";
+  if (score >= 50) return "🟡";
+  return "🔴";
+}
+
 export default function HomeScreen() {
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
@@ -55,7 +63,6 @@ export default function HomeScreen() {
       if (health && Object.keys(health).length > 0) {
         return submitScore(health);
       }
-      // Sem wearable — calcula score apenas com ciclo
       return submitScore({});
     },
     onSuccess: () => {
@@ -69,6 +76,25 @@ export default function HomeScreen() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function handleShareScore() {
+    if (!score) return;
+    const phase = PHASE_LABELS[score.phase as CyclePhase];
+    const emoji = scoreEmoji(score.score);
+    const message = [
+      `${emoji} Score Femme Performance: ${score.score}/100`,
+      `Fase ${phase} · Dia ${score.cycleDay} do ciclo`,
+      "",
+      "Treine com o seu ciclo a favor. 💚",
+      "femmeperformance.app",
+    ].join("\n");
+
+    try {
+      await Share.share({ message });
+    } catch {
+      Alert.alert("Erro", "Não foi possível compartilhar.");
+    }
+  }
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -105,7 +131,7 @@ export default function HomeScreen() {
             <Text style={styles.greeting}>{greeting()},</Text>
             <Text style={styles.name} numberOfLines={1}>{user?.name ?? "—"}</Text>
           </View>
-          <View style={styles.notifBtn}>
+          <TouchableOpacity style={styles.notifBtn} onPress={() => router.push("/(tabs)/settings")}>
             <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
               <Path
                 d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
@@ -118,7 +144,7 @@ export default function HomeScreen() {
                 strokeWidth={1.5}
               />
             </Svg>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* Score card */}
@@ -139,16 +165,33 @@ export default function HomeScreen() {
                   Dia {score.cycleDay} do ciclo
                 </Text>
               </View>
-              <View style={styles.scoreNum}>
-                <Text
-                  style={[
-                    styles.scoreValue,
-                    { color: scoreColor(score.score) },
-                  ]}
+              <View style={styles.scoreRight}>
+                <View style={styles.scoreNum}>
+                  <Text
+                    style={[
+                      styles.scoreValue,
+                      { color: scoreColor(score.score) },
+                    ]}
+                  >
+                    {score.score}
+                  </Text>
+                  <Text style={styles.scoreLabel}>score hoje</Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.shareBtn}
+                  onPress={handleShareScore}
+                  activeOpacity={0.7}
                 >
-                  {score.score}
-                </Text>
-                <Text style={styles.scoreLabel}>score hoje</Text>
+                  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                    <Path
+                      d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"
+                      stroke={Colors.accent}
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </Svg>
+                </TouchableOpacity>
               </View>
             </View>
             <PhaseBar currentPhase={score.phase as CyclePhase} />
@@ -295,6 +338,10 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     marginTop: 8,
   },
+  scoreRight: {
+    alignItems: "flex-end",
+    gap: 8,
+  },
   scoreNum: {
     alignItems: "flex-end",
   },
@@ -306,6 +353,16 @@ const styles = StyleSheet.create({
   scoreLabel: {
     fontSize: 10,
     color: Colors.textMuted,
+  },
+  shareBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.accentDim,
+    borderWidth: 1,
+    borderColor: Colors.accentBorder,
+    alignItems: "center",
+    justifyContent: "center",
   },
   noScore: {
     fontSize: 13,
@@ -329,7 +386,6 @@ const styles = StyleSheet.create({
   recCard: {
     marginHorizontal: Spacing.xl,
     marginTop: Spacing.md,
-    cursor: "pointer",
   },
   recRow: {
     flexDirection: "row",

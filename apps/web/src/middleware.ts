@@ -5,6 +5,8 @@ const PUBLIC_ROUTES = new Set([
   "/api/auth/register",
   "/api/auth/login",
   "/api/auth/refresh",
+  "/api/auth/forgot-password",
+  "/api/auth/reset-password",
   "/api/health",
 ]);
 

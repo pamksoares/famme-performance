@@ -2,7 +2,7 @@ import * as SecureStore from "expo-secure-store";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
 
-class ApiError extends Error {
+export class ApiError extends Error {
   constructor(
     public status: number,
     message: string
@@ -102,6 +102,24 @@ export async function logout(): Promise<void> {
   await request("/api/auth/logout", { method: "POST" });
 }
 
+export async function forgotPassword(email: string): Promise<{ sent: boolean }> {
+  return request("/api/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function resetPassword(payload: {
+  email: string;
+  code: string;
+  newPassword: string;
+}): Promise<{ reset: boolean }> {
+  return request("/api/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 // ─── Cycle ────────────────────────────────────────────────────────────────────
 
 export interface CycleEntry {
@@ -117,7 +135,6 @@ export async function saveCycle(payload: {
   return request("/api/cycle", { method: "POST", body: JSON.stringify(payload) });
 }
 
-/** Versão para uso durante o onboarding — usa o token passado diretamente */
 export async function saveCycleWithToken(
   token: string,
   payload: { startDate: string; cycleLengthDays: number }
@@ -180,7 +197,7 @@ export async function getScoreHistory(days = 14): Promise<ScoreHistory> {
   return request(`/api/score/history?days=${days}`);
 }
 
-// ─── Recommendation ────────────────────────────────────────────────────────────
+// ─── Recommendation ───────────────────────────────────────────────────────────
 
 export interface Recommendation {
   classification: "green" | "yellow" | "red";
@@ -198,25 +215,20 @@ export async function getRecommendation(): Promise<Recommendation> {
 
 // ─── Integrations ─────────────────────────────────────────────────────────────
 
-// ─── Garmin ───────────────────────────────────────────────────────────────────
-
 export interface GarminStatus {
   connected: boolean;
   lastSyncedAt: string | null;
   connectedAt: string | null;
 }
 
-/** Retorna URL do widget Terra para conectar o Garmin */
 export async function getGarminConnectUrl(): Promise<{ url: string }> {
   return request("/api/integrations/garmin/connect");
 }
 
-/** Status da integração Garmin */
 export async function getGarminStatus(): Promise<GarminStatus> {
   return request("/api/integrations/garmin");
 }
 
-/** Desconecta o Garmin */
 export async function disconnectGarmin(): Promise<{ disconnected: boolean }> {
   return request("/api/integrations/garmin", { method: "DELETE" });
 }
@@ -267,5 +279,16 @@ export async function updateUser(payload: {
   return request("/api/user", {
     method: "PATCH",
     body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteAccount(): Promise<{ deleted: boolean }> {
+  return request("/api/user", { method: "DELETE" });
+}
+
+export async function registerPushToken(token: string): Promise<{ registered: boolean }> {
+  return request("/api/user/push-token", {
+    method: "POST",
+    body: JSON.stringify({ token }),
   });
 }

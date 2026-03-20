@@ -20,6 +20,7 @@ import {
   getGarminStatus,
   getGarminConnectUrl,
   disconnectGarmin,
+  deleteAccount,
 } from "@/lib/api";
 import { useAuthStore } from "@/lib/store";
 import {
@@ -38,7 +39,6 @@ export default function SettingsScreen() {
   const [cycleNotif, setCycleNotif] = useState(true);
   const [appleConnected, setAppleConnected] = useState(false);
 
-  // Status Garmin
   const { data: garminStatus, isLoading: garminLoading } = useQuery({
     queryKey: ["garmin", "status"],
     queryFn: getGarminStatus,
@@ -47,7 +47,6 @@ export default function SettingsScreen() {
 
   const garminConnected = garminStatus?.connected ?? false;
 
-  // Conectar Garmin
   const connectGarminMutation = useMutation({
     mutationFn: async () => {
       const { url } = await getGarminConnectUrl();
@@ -63,11 +62,21 @@ export default function SettingsScreen() {
     },
   });
 
-  // Desconectar Garmin
   const disconnectGarminMutation = useMutation({
     mutationFn: disconnectGarmin,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["garmin"] });
+    },
+  });
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: deleteAccount,
+    onSuccess: async () => {
+      await clearUser();
+      router.replace("/(auth)/login");
+    },
+    onError: (e: any) => {
+      Alert.alert("Erro", e.message ?? "Não foi possível excluir a conta.");
     },
   });
 
@@ -139,10 +148,25 @@ export default function SettingsScreen() {
         onPress: async () => {
           await logout().catch(() => null);
           await clearUser();
-          router.replace("/(auth)/onboarding/");
+          router.replace("/(auth)/login");
         },
       },
     ]);
+  }
+
+  function handleDeleteAccount() {
+    Alert.alert(
+      "Excluir conta",
+      "Essa ação é permanente e não pode ser desfeita. Todos os seus dados serão removidos imediatamente (LGPD).",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Excluir definitivamente",
+          style: "destructive",
+          onPress: () => deleteAccountMutation.mutate(),
+        },
+      ]
+    );
   }
 
   const initials = user?.name
@@ -173,7 +197,11 @@ export default function SettingsScreen() {
         contentContainerStyle={styles.content}
       >
         {/* Perfil */}
-        <View style={styles.profileCard}>
+        <TouchableOpacity
+          style={styles.profileCard}
+          onPress={() => router.push("/(tabs)/edit-profile")}
+          activeOpacity={0.8}
+        >
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>{initials}</Text>
           </View>
@@ -186,12 +214,17 @@ export default function SettingsScreen() {
               </Text>
             </Text>
           </View>
-        </View>
+          <Text style={styles.editChevron}>›</Text>
+        </TouchableOpacity>
 
         {/* Upgrade */}
         {user?.plan === "FREE" && (
-          <TouchableOpacity style={styles.upgradeCard} activeOpacity={0.8}>
-            <Text style={styles.upgradeTitle}>Fazer upgrade para Pro — R$29/mês</Text>
+          <TouchableOpacity
+            style={styles.upgradeCard}
+            activeOpacity={0.8}
+            onPress={() => router.push("/(tabs)/upgrade")}
+          >
+            <Text style={styles.upgradeTitle}>✦ Fazer upgrade para Pro — R$29/mês</Text>
             <Text style={styles.upgradeText}>
               Recomendações de IA, histórico completo, 3 wearables
             </Text>
@@ -201,7 +234,6 @@ export default function SettingsScreen() {
         {/* Integrações */}
         <Text style={styles.sectionLabel}>INTEGRAÇÕES</Text>
 
-        {/* Apple Health (iOS only) */}
         {Platform.OS === "ios" ? (
           <View style={styles.intCard}>
             <View style={[styles.intIcon, { backgroundColor: "#1a1a1a" }]}>
@@ -227,12 +259,8 @@ export default function SettingsScreen() {
             </View>
             <View style={styles.intInfo}>
               <Text style={styles.intName}>Health Connect</Text>
-              <Text style={styles.intStatus}>
-                Garmin, Samsung Health e mais
-              </Text>
-              <Text style={[styles.intStatus, { color: Colors.textDim }]}>
-                Em breve
-              </Text>
+              <Text style={styles.intStatus}>Garmin, Samsung Health e mais</Text>
+              <Text style={[styles.intStatus, { color: Colors.textDim }]}>Em breve</Text>
             </View>
             <View style={styles.soonBadge}>
               <Text style={styles.soonText}>Em breve</Text>
@@ -240,7 +268,6 @@ export default function SettingsScreen() {
           </View>
         )}
 
-        {/* Garmin Connect */}
         <TouchableOpacity
           style={styles.intCard}
           onPress={handleGarminPress}
@@ -280,7 +307,6 @@ export default function SettingsScreen() {
           )}
         </TouchableOpacity>
 
-        {/* Whoop */}
         <View style={[styles.intCard, { opacity: 0.4 }]}>
           <View style={[styles.intIcon, { backgroundColor: "#1a0d0d" }]}>
             <Text>💪</Text>
@@ -319,9 +345,7 @@ export default function SettingsScreen() {
         <TouchableOpacity
           style={styles.actionRow}
           onPress={() =>
-            Linking.openURL(
-              "mailto:suporte@famme.app?subject=Suporte Femme Performance"
-            )
+            Linking.openURL("mailto:suporte@famme.app?subject=Suporte Femme Performance")
           }
         >
           <Text style={styles.actionText}>Falar com suporte</Text>
@@ -331,6 +355,23 @@ export default function SettingsScreen() {
         <TouchableOpacity style={styles.actionRow} onPress={handleLogout}>
           <Text style={[styles.actionText, { color: Colors.menstrual }]}>Sair</Text>
           <Text style={[styles.actionChevron, { color: Colors.menstrual }]}>›</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.actionRow, { borderColor: Colors.menstrual + "44" }]}
+          onPress={handleDeleteAccount}
+          disabled={deleteAccountMutation.isPending}
+        >
+          {deleteAccountMutation.isPending ? (
+            <ActivityIndicator size="small" color={Colors.menstrual} />
+          ) : (
+            <>
+              <Text style={[styles.actionText, { color: Colors.menstrual, opacity: 0.7 }]}>
+                Excluir conta
+              </Text>
+              <Text style={[styles.actionChevron, { color: Colors.menstrual, opacity: 0.7 }]}>›</Text>
+            </>
+          )}
         </TouchableOpacity>
 
         <Text style={styles.version}>Femme Performance v1.0.0</Text>
@@ -372,6 +413,7 @@ const styles = StyleSheet.create({
   avatarText: { fontSize: 17, fontWeight: "500", color: Colors.accent },
   profileName: { fontSize: 15, fontWeight: "500", color: Colors.text },
   profileSub: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+  editChevron: { fontSize: 22, color: Colors.textMuted, lineHeight: 24 },
   upgradeCard: {
     backgroundColor: Colors.accentDim,
     borderRadius: Radius.lg,

@@ -19,7 +19,7 @@ const USER_SELECT = {
   createdAt: true,
 } as const;
 
-// GET /api/user — retorna o perfil do usuário autenticado
+// GET /api/user
 export async function GET(req: NextRequest) {
   try {
     const userId = req.headers.get("x-user-id");
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// PATCH /api/user — atualiza nome e/ou modalidade
+// PATCH /api/user
 export async function PATCH(req: NextRequest) {
   try {
     const userId = req.headers.get("x-user-id");
@@ -63,6 +63,20 @@ export async function PATCH(req: NextRequest) {
     });
 
     return ok(user);
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
+// DELETE /api/user — exclui conta permanentemente (LGPD)
+export async function DELETE(req: NextRequest) {
+  try {
+    const userId = req.headers.get("x-user-id");
+    if (!userId) return unauthorized();
+
+    await prisma.user.delete({ where: { id: userId } });
+
+    return ok({ deleted: true });
   } catch (error) {
     return handleError(error);
   }

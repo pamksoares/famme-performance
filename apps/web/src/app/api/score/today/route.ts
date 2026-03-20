@@ -7,6 +7,7 @@ import {
   computeHrvBaseline,
 } from "@/lib/score";
 import { ok, err, handleError } from "@/lib/response";
+import { sendPhaseChangeNotification } from "@/lib/push";
 
 const schema = z.object({
   hrv: z.number().int().positive().optional(),
@@ -14,7 +15,7 @@ const schema = z.object({
   restingHeartRate: z.number().int().positive().optional(),
 });
 
-// GET /api/score/today — retorna ou calcula o score do dia
+// GET /api/score/today
 export async function GET(req: NextRequest) {
   const userId = req.headers.get("x-user-id")!;
   const today = new Date();
@@ -26,16 +27,13 @@ export async function GET(req: NextRequest) {
     });
 
     if (existing) return ok(existing);
-
-    // Não há score hoje — tenta calcular com os últimos dados de wearable
-    // (dados serão submetidos via POST)
     return ok(null);
   } catch (error) {
     return handleError(error);
   }
 }
 
-// POST /api/score/today — recebe métricas e persiste o score calculado
+// POST /api/score/today
 export async function POST(req: NextRequest) {
   const userId = req.headers.get("x-user-id")!;
 
@@ -43,7 +41,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { hrv, sleepHours, restingHeartRate } = schema.parse(body);
 
-    // Ciclo mais recente
     const cycle = await prisma.cycleEntry.findFirst({
       where: { userId },
       orderBy: { startDate: "desc" },
@@ -53,7 +50,6 @@ export async function POST(req: NextRequest) {
       return err("Configure seu ciclo menstrual antes de gerar o score", 422);
     }
 
-    // HRV baseline: média dos últimos 30 scores com HRV disponível
     const recentScores = await prisma.dailyScore.findMany({
       where: { userId, hrv: { not: null } },
       orderBy: { date: "desc" },
@@ -73,6 +69,14 @@ export async function POST(req: NextRequest) {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
+    // Verifica se a fase mudou em relação ao dia anterior
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayScore = await prisma.dailyScore.findUnique({
+      where: { userId_date: { userId, date: yesterday } },
+      select: { phase: true },
+    });
 
     const dailyScore = await prisma.dailyScore.upsert({
       where: { userId_date: { userId, date: today } },
@@ -95,6 +99,19 @@ export async function POST(req: NextRequest) {
         restingHeartRate: restingHeartRate ?? null,
       },
     });
+
+    // Envia push notification se a fase mudou
+    const phaseChanged = yesterdayScore && yesterdayScore.phase !== phase;
+    if (phaseChanged) {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { pushToken: true },
+      });
+
+      if (user?.pushToken) {
+        sendPhaseChangeNotification(user.pushToken, phase).catch(() => null);
+      }
+    }
 
     return ok({ ...dailyScore, hrvBaseline });
   } catch (error) {

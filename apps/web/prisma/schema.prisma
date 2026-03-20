@@ -55,14 +55,16 @@ model User {
   name         String
   modality     Modality  @default(CROSSFIT)
   plan         Plan      @default(FREE)
+  pushToken    String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  cycleEntries   CycleEntry[]
-  dailyScores    DailyScore[]
-  integrations   Integration[]
-  subscription   Subscription?
-  refreshTokens  RefreshToken[]
+  cycleEntries        CycleEntry[]
+  dailyScores         DailyScore[]
+  integrations        Integration[]
+  subscription        Subscription?
+  refreshTokens       RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
 
   @@map("users")
 }
@@ -82,6 +84,20 @@ model RefreshToken {
 
   @@index([userId])
   @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  code      String
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -115,7 +131,7 @@ model DailyScore {
   hrv             Int?       // ms
   sleepHours      Float?
   restingHeartRate Int?
-  recommendation  String?    @db.Text  // gerado pelo Claude
+  recommendation  String?    @db.Text
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 

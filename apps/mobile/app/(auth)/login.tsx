@@ -61,7 +61,14 @@ export default function LoginScreen() {
             autoCapitalize="none"
           />
 
-          <Text style={styles.label}>SENHA</Text>
+          <View style={styles.passwordRow}>
+            <Text style={styles.label}>SENHA</Text>
+            <TouchableOpacity
+              onPress={() => router.push("/(auth)/forgot-password")}
+            >
+              <Text style={styles.forgotText}>Esqueci minha senha</Text>
+            </TouchableOpacity>
+          </View>
           <TextInput
             style={styles.input}
             placeholder="Sua senha"
@@ -82,10 +89,13 @@ export default function LoginScreen() {
           />
 
           <TouchableOpacity
-            style={styles.back}
+            style={styles.registerLink}
             onPress={() => router.replace("/(auth)/register")}
           >
-            <Text style={styles.backText}>Criar uma conta</Text>
+            <Text style={styles.registerLinkText}>
+              Não tem conta?{" "}
+              <Text style={styles.registerLinkAccent}>Criar agora</Text>
+            </Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -116,6 +126,16 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     marginBottom: 6,
   },
+  passwordRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  forgotText: {
+    fontSize: 12,
+    color: Colors.accent,
+  },
   input: {
     backgroundColor: Colors.bgCard,
     borderWidth: 1,
@@ -131,13 +151,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 4,
   },
-  back: {
+  registerLink: {
     alignItems: "center",
     marginTop: Spacing.xl,
     padding: 8,
   },
-  backText: {
-    color: Colors.accent,
+  registerLinkText: {
     fontSize: 14,
+    color: Colors.textMuted,
+  },
+  registerLinkAccent: {
+    color: Colors.accent,
+    fontWeight: "600",
   },
 });
