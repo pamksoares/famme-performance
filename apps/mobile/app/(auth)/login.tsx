@@ -83,7 +83,7 @@ export default function LoginScreen() {
 
           <TouchableOpacity
             style={styles.back}
-            onPress={() => router.replace("/(auth)/onboarding/")}
+            onPress={() => router.replace("/(auth)/register")}
           >
             <Text style={styles.backText}>Criar uma conta</Text>
           </TouchableOpacity>
