@@ -146,7 +146,7 @@ export default function SettingsScreen() {
   }
 
   const initials = user?.name
-    .split(" ")
+    ?.split(" ")
     .map((n) => n[0])
     .slice(0, 2)
     .join("")

@@ -199,7 +199,13 @@ export default function HomeScreen() {
                   <Text style={styles.recLabel}>RECOMENDAÇÃO DE HOJE</Text>
                   <Text style={styles.recTitle}>
                     {score.recommendation
-                      ? JSON.parse(score.recommendation).title
+                      ? (() => {
+                          try {
+                            return JSON.parse(score.recommendation).title;
+                          } catch {
+                            return "Ver recomendação";
+                          }
+                        })()
                       : "Ver recomendação"}
                   </Text>
                   <Text style={styles.recSub}>

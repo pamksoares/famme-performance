@@ -201,15 +201,6 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   soonText: { fontSize: 10, color: Colors.textDim },
-  garminBadge: {
-    borderWidth: 1,
-    borderColor: Colors.accentBorder,
-    borderRadius: Radius.full,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    backgroundColor: Colors.accentDim,
-  },
-  garminBadgeText: { fontSize: 10, color: Colors.accent },
   hint: {
     fontSize: 12,
     color: Colors.textDim,

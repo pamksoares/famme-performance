@@ -7,12 +7,17 @@ export interface HealthData {
   restingHeartRate?: number;
 }
 
-// ─── iOS: Apple HealthKit ──────────────────────────────────────────────────────
+/**
+ * Lê dados de saúde das últimas 24h.
+ * iOS → Apple HealthKit (quando react-native-health estiver instalado)
+ * Android → null por enquanto (Health Connect em breve)
+ */
+export async function requestAndReadHealth(): Promise<HealthData | null> {
+  if (Platform.OS !== "ios") return null;
 
-async function requestAndReadAppleHealth(): Promise<HealthData | null> {
   try {
-    // Import dinâmico — nunca bundled no Android
-    const AppleHealthKit = (await import("react-native-health")).default;
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const AppleHealthKit = require("react-native-health").default;
 
     const PERMISSIONS = {
       permissions: {
@@ -41,14 +46,13 @@ async function requestAndReadAppleHealth(): Promise<HealthData | null> {
       ascending: false,
     };
 
-    function promisify<T>(fn: Function, opts: object): Promise<T> {
-      return new Promise((resolve, reject) => {
+    const promisify = <T>(fn: Function, opts: object): Promise<T> =>
+      new Promise((resolve, reject) => {
         fn(opts, (err: string, results: T) => {
           if (err) reject(new Error(err));
           else resolve(results);
         });
       });
-    }
 
     const [hrvResults, sleepResults, hrResults] = await Promise.allSettled([
       promisify<any[]>(
@@ -93,23 +97,8 @@ async function requestAndReadAppleHealth(): Promise<HealthData | null> {
   }
 }
 
-// ─── Unified API ──────────────────────────────────────────────────────────────
-
 /**
- * Solicita permissões de saúde e lê dados das últimas 24h.
- * iOS → Apple HealthKit | Android → Health Connect (em breve)
- */
-export async function requestAndReadHealth(): Promise<HealthData | null> {
-  if (Platform.OS === "ios") {
-    return requestAndReadAppleHealth();
-  }
-  // Android: Health Connect integration — em breve
-  return null;
-}
-
-/**
- * Sincroniza dados de saúde com o backend.
- * Falha silenciosa — nunca bloqueia a UI.
+ * Sincroniza dados de saúde com o backend. Falha silenciosa.
  */
 export async function syncHealthData(): Promise<HealthData | null> {
   const data = await requestAndReadHealth();
