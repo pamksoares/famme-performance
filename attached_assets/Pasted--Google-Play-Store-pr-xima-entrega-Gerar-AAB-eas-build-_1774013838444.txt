@@ -1,0 +1,45 @@
+. Google Play Store (próxima entrega)
+Gerar AAB (eas build --platform android --profile production)
+Criar conta Google Play ($25 taxa única)
+Fazer upload do AAB + screenshots + descrição
+Configurar android.versionCode auto-increment (já tem autoIncrement: true no eas.json)
+2. Health Connect Android (Garmin grátis)
+O react-native-health-connect@3.5.0 não é compatível com React Native 0.74 (Gradle falha)
+Aguardar versão compatível ou usar abordagem alternativa
+Quando integrado: Garmin Connect sincroniza dados automaticamente para o Health Connect
+Permissões necessárias: SleepSession, HeartRate, HeartRateVariabilitySdnn
+Atualizar lib/health.ts — já tem o stub Android pronto, só precisa descomenttar
+3. Push Notifications
+expo-notifications já está instalado e configurado no app.json
+Falta: lógica de envio no backend quando score diário muda de fase
+Falta: tela de configuração de notificações em settings
+4. Onboarding melhorado
+Adicionar validação visual de força de senha no profile.tsx
+Adicionar feedback quando email já está cadastrado (erro 409)
+Adicionar "Esqueci minha senha" no login
+5. Planos e paywall
+Tela de upgrade (PRO/ELITE) com benefícios
+Stripe checkout já funciona, falta UI de upgrade
+Lógica de gatekeeping por plano (ex: histórico de 30 dias = PRO, histórico 14 dias = FREE)
+6. Perfil e edição de dados
+Tela para editar nome, modalidade, ciclo
+Deletar conta (LGPD)
+7. Compartilhamento de score
+Gerar imagem do score do dia para compartilhar no Instagram/WhatsApp
+COMO RODAR LOCALMENTE
+# Backend
+cd apps/web
+cp .env.example .env  # preencher variáveis
+npx prisma db push
+yarn dev  # http://localhost:3000
+
+# Mobile (simulador ou dispositivo físico)
+cd apps/mobile
+yarn start  # Expo Go ou expo run:android
+
+COMO GERAR APK
+cd apps/mobile
+EXPO_TOKEN=<token> npx eas-cli build --platform android --profile apk --non-interactive
+
+IMPORTANTE — PATCH EXPO-MODULES-CORE
+Há um bug no expo-modules-core@1.12.26 com Gradle 8.8 (from components.release). O fix está em patches/expo-modules-core+1.12.26.patch e é aplicado automaticamente via postinstall (root package.json). Não remova este patch ou os builds Android vão falhar.
