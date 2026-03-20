@@ -1,3 +1,5 @@
+import { CyclePhase } from "@prisma/client";
+
 const EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
 
 export interface PushMessage {
@@ -25,9 +27,9 @@ export async function sendPushNotification(message: PushMessage): Promise<void> 
 
 export async function sendPhaseChangeNotification(
   pushToken: string,
-  phase: string
+  phase: CyclePhase
 ): Promise<void> {
-  const PHASE_MESSAGES: Record<string, { title: string; body: string }> = {
+  const PHASE_MESSAGES: Record<CyclePhase, { title: string; body: string }> = {
     MENSTRUAL: {
       title: "Nova fase: Menstrual 🔴",
       body: "Seu corpo pede mais recuperação. Veja o score de hoje.",
@@ -49,10 +51,24 @@ export async function sendPhaseChangeNotification(
   const msg = PHASE_MESSAGES[phase];
   if (!msg) return;
 
+  await sendPushNotification({ to: pushToken, ...msg, data: { phase } });
+}
+
+export async function sendDailyReminder(
+  pushToken: string,
+  phase: CyclePhase
+): Promise<void> {
+  const PHASE_REMINDERS: Record<CyclePhase, string> = {
+    FOLLICULAR: "💪 Boa energia hoje — registre seu score e aproveite a fase!",
+    OVULATORY: "🔥 Pico de performance! Não esqueça de registrar seu dia.",
+    LUTEAL: "🌙 Fase de recuperação — registre como você está se sentindo.",
+    MENSTRUAL: "❤️ Cuide de você hoje. Registre seu score para acompanhar.",
+  };
+
   await sendPushNotification({
     to: pushToken,
-    title: msg.title,
-    body: msg.body,
-    data: { phase },
+    title: "Femme Performance 🌿",
+    body: PHASE_REMINDERS[phase],
+    data: { type: "daily_reminder" },
   });
 }

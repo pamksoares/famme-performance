@@ -11,6 +11,23 @@ function HomeIcon({ color }: { color: string }) {
   );
 }
 
+function CheckInIcon({ color }: { color: string }) {
+  return (
+    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+      <Path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke={color} strokeWidth={1.5} strokeLinecap="round" />
+      <Path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke={color} strokeWidth={1.5} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+function InsightsIcon({ color }: { color: string }) {
+  return (
+    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+      <Polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke={color} strokeWidth={1.5} />
+    </Svg>
+  );
+}
+
 function TrainingIcon({ color }: { color: string }) {
   return (
     <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
@@ -23,7 +40,8 @@ function TrainingIcon({ color }: { color: string }) {
 function HistoryIcon({ color }: { color: string }) {
   return (
     <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-      <Polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke={color} strokeWidth={1.5} />
+      <Path d="M3 3v5h5" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   );
 }
@@ -60,6 +78,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="check-in"
+        options={{
+          title: "Check-in",
+          tabBarIcon: ({ color }) => <CheckInIcon color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="training"
         options={{
           title: "Treino",
@@ -83,6 +108,7 @@ export default function TabsLayout() {
       {/* Telas sem tab bar */}
       <Tabs.Screen name="upgrade" options={{ href: null }} />
       <Tabs.Screen name="edit-profile" options={{ href: null }} />
+      <Tabs.Screen name="insights" options={{ href: null }} />
     </Tabs>
   );
 }

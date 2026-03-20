@@ -56,11 +56,13 @@ model User {
   modality     Modality  @default(CROSSFIT)
   plan         Plan      @default(FREE)
   pushToken    String?
+  streakDays   Int       @default(0)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
   cycleEntries        CycleEntry[]
   dailyScores         DailyScore[]
+  dailyCheckIns       DailyCheckIn[]
   integrations        Integration[]
   subscription        Subscription?
   refreshTokens       RefreshToken[]
@@ -186,4 +188,27 @@ model Subscription {
 
   @@index([stripeCustomerId])
   @@map("subscriptions")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Daily Check-in
+// ─────────────────────────────────────────────────────────────────────────────
+
+model DailyCheckIn {
+  id           String     @id @default(cuid())
+  userId       String
+  date         DateTime   @db.Date
+  energy       Int        // 1–5
+  mood         Int        // 1–5
+  pain         Boolean
+  sleepQuality Int        // 1–5
+  notes        String?    @db.Text
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, date(sort: Desc)])
+  @@map("daily_checkins")
 }

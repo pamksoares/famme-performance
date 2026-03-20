@@ -171,6 +171,7 @@ export interface DailyScore {
   restingHeartRate: number | null;
   recommendation: string | null;
   hrvBaseline?: number | null;
+  streakDays?: number;
 }
 
 export async function submitScore(payload: {
@@ -290,5 +291,34 @@ export async function registerPushToken(token: string): Promise<{ registered: bo
   return request("/api/user/push-token", {
     method: "POST",
     body: JSON.stringify({ token }),
+  });
+}
+
+// ─── Check-in ─────────────────────────────────────────────────────────────────
+
+export interface DailyCheckIn {
+  id: string;
+  date: string;
+  energy: number;
+  mood: number;
+  pain: boolean;
+  sleepQuality: number;
+  notes: string | null;
+}
+
+export async function getTodayCheckIn(): Promise<DailyCheckIn | null> {
+  return request("/api/checkin");
+}
+
+export async function submitCheckIn(payload: {
+  energy: number;
+  mood: number;
+  pain: boolean;
+  sleepQuality: number;
+  notes?: string;
+}): Promise<DailyCheckIn> {
+  return request("/api/checkin", {
+    method: "POST",
+    body: JSON.stringify(payload),
   });
 }

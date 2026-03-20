@@ -9,7 +9,7 @@ import { useAuthStore } from "@/lib/store";
 import type { CyclePhase } from "@/lib/api";
 
 const BAR_MAX_HEIGHT = 80;
-const FREE_DAYS_LIMIT = 14;
+const FREE_DAYS_LIMIT = 7;
 const PRO_DAYS_LIMIT = 30;
 
 function ScoreBar({
@@ -123,7 +123,7 @@ export default function HistoryScreen() {
           >
             <Text style={styles.upgradePromptTitle}>✦ Desbloqueie 30 dias de histórico</Text>
             <Text style={styles.upgradePromptText}>
-              Com o plano Pro você vê padrões completos do seu ciclo e treina com mais precisão.
+              No gratuito você vê os últimos 7 dias. Com o Pro, acesse 30 dias completos e insights por fase.
             </Text>
             <Text style={styles.upgradePromptCta}>Ver planos →</Text>
           </TouchableOpacity>

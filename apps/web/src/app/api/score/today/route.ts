@@ -25,7 +25,6 @@ export async function GET(req: NextRequest) {
     const existing = await prisma.dailyScore.findUnique({
       where: { userId_date: { userId, date: today } },
     });
-
     if (existing) return ok(existing);
     return ok(null);
   } catch (error) {
@@ -70,13 +69,22 @@ export async function POST(req: NextRequest) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Verifica se a fase mudou em relação ao dia anterior
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
+
     const yesterdayScore = await prisma.dailyScore.findUnique({
       where: { userId_date: { userId, date: yesterday } },
       select: { phase: true },
     });
+
+    // Calcula streak
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { streakDays: true, pushToken: true },
+    });
+
+    const hadYesterdayScore = !!yesterdayScore;
+    const newStreak = hadYesterdayScore ? (user?.streakDays ?? 0) + 1 : 1;
 
     const dailyScore = await prisma.dailyScore.upsert({
       where: { userId_date: { userId, date: today } },
@@ -100,20 +108,18 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Envia push notification se a fase mudou
-    const phaseChanged = yesterdayScore && yesterdayScore.phase !== phase;
-    if (phaseChanged) {
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { pushToken: true },
-      });
+    await prisma.user.update({
+      where: { id: userId },
+      data: { streakDays: newStreak },
+    });
 
-      if (user?.pushToken) {
-        sendPhaseChangeNotification(user.pushToken, phase).catch(() => null);
-      }
+    // Push: mudança de fase
+    const phaseChanged = yesterdayScore && yesterdayScore.phase !== phase;
+    if (phaseChanged && user?.pushToken) {
+      sendPhaseChangeNotification(user.pushToken, phase).catch(() => null);
     }
 
-    return ok({ ...dailyScore, hrvBaseline });
+    return ok({ ...dailyScore, hrvBaseline, streakDays: newStreak });
   } catch (error) {
     return handleError(error);
   }

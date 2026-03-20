@@ -231,6 +231,17 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         )}
 
+        {/* Insights */}
+        <TouchableOpacity
+          style={styles.menuRow}
+          onPress={() => router.push("/(tabs)/insights")}
+          accessibilityLabel="Ver insights mensais"
+          accessibilityRole="button"
+        >
+          <Text style={styles.menuRowText}>📊  Insights mensais</Text>
+          <Text style={styles.menuRowArrow}>›</Text>
+        </TouchableOpacity>
+
         {/* Integrações */}
         <Text style={styles.sectionLabel}>INTEGRAÇÕES</Text>
 
@@ -492,6 +503,19 @@ const styles = StyleSheet.create({
   },
   actionText: { fontSize: 14, color: Colors.text },
   actionChevron: { fontSize: 20, color: Colors.textMuted, lineHeight: 22 },
+  menuRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: Colors.bgCard,
+    borderRadius: Radius.lg,
+    padding: 16,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  menuRowText: { fontSize: 14, color: Colors.text },
+  menuRowArrow: { fontSize: 20, color: Colors.textMuted },
   version: {
     fontSize: 11,
     color: Colors.textDisabled,

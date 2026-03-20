@@ -195,6 +195,11 @@ export default function HomeScreen() {
               </View>
             </View>
             <PhaseBar currentPhase={score.phase as CyclePhase} />
+            {score.streakDays != null && score.streakDays >= 2 && (
+              <View style={styles.streakBadge}>
+                <Text style={styles.streakText}>🔥 {score.streakDays} dias seguidos</Text>
+              </View>
+            )}
           </Card>
         ) : (
           <Card style={styles.scoreCard}>
@@ -407,5 +412,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.textMuted,
     marginTop: 3,
+  },
+  streakBadge: {
+    marginTop: 10,
+    alignSelf: "flex-start",
+    backgroundColor: "rgba(239,159,39,0.12)",
+    borderRadius: 99,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: "rgba(239,159,39,0.3)",
+  },
+  streakText: {
+    fontSize: 12,
+    color: Colors.yellow,
+    fontWeight: "500",
   },
 });
