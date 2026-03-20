@@ -32,3 +32,9 @@ outputType = "webview"
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[userenv]
+
+[userenv.shared]
+JWT_ACCESS_SECRET = "EcS0uylZn+tMJsafxCsvAskstkLxQKEiQDBJFnOLFGqHy1bS4QT70NDi1otEaVATdaTOMJAvZxKRzgcOsn7xvw=="
+JWT_REFRESH_SECRET = "5xHE4XkcW8zwpiHLXIZudt9emOIHIOulnfZ0/nChQEhJVj8wvxHJny4xgxr5aqPT5NLsvUil78WAn/D3j0EWTA=="
