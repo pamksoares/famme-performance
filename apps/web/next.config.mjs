@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone", // gera bundle self-contained para container Docker
   experimental: {
     serverComponentsExternalPackages: ["@prisma/client", "bcryptjs"],
   },
