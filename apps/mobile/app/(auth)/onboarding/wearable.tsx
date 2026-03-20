@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "@/components/ui/Button";
 import { Toggle } from "@/components/ui/Toggle";
 import { Colors, Spacing, Radius } from "@/constants/theme";
-import { register, saveCycle } from "@/lib/api";
+import { register, saveCycleWithToken } from "@/lib/api";
 import { useAuthStore } from "@/lib/store";
 import { requestAndReadHealth } from "@/lib/health";
 import { onboardingData } from "./profile";
@@ -27,17 +27,23 @@ export default function WearableScreen() {
     setLoading(true);
     setError(null);
     try {
+      // 1. Cria a conta
       const { user, accessToken } = await register({
         name: onboardingData.name,
         email: onboardingData.email,
         password: onboardingData.password,
         modality: onboardingData.modality,
       });
-      await setUser(user, accessToken);
-      await saveCycle({
+
+      // 2. Salva o ciclo (usa o token recém criado temporariamente)
+      await saveCycleWithToken(accessToken, {
         startDate: onboardingData.startDate,
         cycleLengthDays: onboardingData.cycleLengthDays,
       });
+
+      // 3. Só autentica no app depois que tudo deu certo
+      await setUser(user, accessToken);
+
       if (!skip && appleEnabled) {
         await requestAndReadHealth();
       }

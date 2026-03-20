@@ -22,7 +22,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canSubmit = email.includes("@") && password.length >= 1;
+  const canSubmit = email.includes("@") && password.length >= 8;
 
   async function handleLogin() {
     setLoading(true);
@@ -83,7 +83,7 @@ export default function LoginScreen() {
 
           <TouchableOpacity
             style={styles.back}
-            onPress={() => router.back()}
+            onPress={() => router.replace("/(auth)/onboarding/")}
           >
             <Text style={styles.backText}>Criar uma conta</Text>
           </TouchableOpacity>

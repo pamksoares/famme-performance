@@ -117,6 +117,24 @@ export async function saveCycle(payload: {
   return request("/api/cycle", { method: "POST", body: JSON.stringify(payload) });
 }
 
+/** Versão para uso durante o onboarding — usa o token passado diretamente */
+export async function saveCycleWithToken(
+  token: string,
+  payload: { startDate: string; cycleLengthDays: number }
+): Promise<CycleEntry> {
+  const res = await fetch(`${BASE_URL}/api/cycle`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error ?? "Erro ao salvar ciclo");
+  return json.data as CycleEntry;
+}
+
 export async function getCycle(): Promise<CycleEntry | null> {
   return request("/api/cycle");
 }
