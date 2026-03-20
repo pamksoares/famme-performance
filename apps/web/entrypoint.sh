@@ -1,8 +1,11 @@
 #!/bin/sh
 set -e
 
-echo "→ Rodando migrations do banco..."
-npx prisma migrate deploy
+echo "→ Sincronizando schema do banco..."
+npx prisma db push --accept-data-loss
+
+echo "→ Gerando Prisma Client..."
+npx prisma generate
 
 echo "→ Subindo servidor..."
 exec node server.js
