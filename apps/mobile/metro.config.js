@@ -6,13 +6,16 @@ const monorepoRoot = path.resolve(projectRoot, "../..");
 
 const config = getDefaultConfig(projectRoot);
 
-// Inclui a pasta raiz do monorepo no watch para que os módulos hoistados sejam encontrados
+// Observa o monorepo inteiro para módulos hoistados
 config.watchFolders = [monorepoRoot];
 
-// Ordem de resolução: primeiro local, depois raiz do monorepo
+// Resolve módulos: primeiro local, depois raiz do monorepo
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, "node_modules"),
   path.resolve(monorepoRoot, "node_modules"),
 ];
+
+// Garante que o entry point do expo-router seja encontrado na raiz do monorepo
+config.resolver.disableHierarchicalLookup = false;
 
 module.exports = config;
