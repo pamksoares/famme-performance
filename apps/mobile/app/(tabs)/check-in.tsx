@@ -87,7 +87,7 @@ export default function CheckInScreen() {
   const [pain, setPain] = useState(false);
   const [sleepQuality, setSleepQuality] = useState(3);
   const [notes, setNotes] = useState("");
-  const [toast, setToast] = useState({ visible: false, message: "", type: "success" as const });
+  const [toast, setToast] = useState<{ visible: boolean; message: string; type: "success" | "error" }>({ visible: false, message: "", type: "success" });
 
   const { data: score } = useQuery({
     queryKey: ["score", "today"],
