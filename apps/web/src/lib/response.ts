@@ -34,5 +34,6 @@ export function handleError(error: unknown) {
   }
 
   console.error("[API Error]", error);
-  return err("Erro interno do servidor", 500);
+  const msg = error instanceof Error ? error.message : String(error);
+  return err(`Erro interno do servidor: ${msg}`, 500);
 }

@@ -8,6 +8,7 @@ const PUBLIC_ROUTES = new Set([
   "/api/auth/forgot-password",
   "/api/auth/reset-password",
   "/api/health",
+  "/api/debug",
 ]);
 
 export async function middleware(request: NextRequest) {
