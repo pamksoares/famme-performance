@@ -10,9 +10,9 @@ function getStore(name: string): Store {
 
 function evictExpired(store: Store) {
   const now = Date.now();
-  for (const [key, entry] of store) {
+  store.forEach((entry, key) => {
     if (now > entry.resetAt) store.delete(key);
-  }
+  });
 }
 
 interface Options {
